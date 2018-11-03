@@ -1,0 +1,746 @@
+Activity,Station_ID,Site Name,Gear,SRBC Method,Date,Time,Fish,County
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,smallmouth bass,4
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,Sculpin species,36
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,margined madtom,111
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,banded darter,27
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,shield darter,15
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,river chub,236
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,fallfish,79
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,cutlips minnow,101
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,longnose dace,114
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,blacknose dace,4
+Fish,1742,PINE000.0-00002,Backpack Electroshock,FISH-005,10/13/2008,0:00,comely shiner,40
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,smallmouth bass,6
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,rock bass,2
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,northern hog sucker,4
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,margined madtom,19
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,banded darter,103
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,river chub,2
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,fallfish,1
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,central stoneroller,1
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,longnose dace,2
+Fish,1741,PINE000.0-00001,Backpack Electroshock,FISH-005,10/13/2008,0:00,comely shiner,6
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,brown trout,33
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,brook trout,7
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,Sculpin species,123
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,creek chub,7
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,cutlips minnow,26
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,longnose dace,11
+Fish,1706,ELKRN00.0-00001,Backpack Electroshock,FISH-005,10/15/2008,0:00,blacknose dace,359
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,White sucker,49
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,tessellated darter,8
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,fallfish,9
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,smallmouth bass,12
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,rock bass,1
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,sculpin species,95
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,brown trout,1
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,northern hog sucker,1
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,blacknose dace,60
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,river chub,72
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,margined madtom,39
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,rosyface shiner,22
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,creek chub,3
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,longnose dace,37
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,Bluntnose minnow,12
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,spottail shiner,1
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,cutlips minnow,48
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,common shiner,9
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,central stoneroller,2
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,shield darter,4
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,banded darter,1
+Fish,1746,PINE000.0-00006,Backpack Electroshock,FISH-005,9/15/2010,0:00,greenside darter,8
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,swallowtail shiner,6
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,shield darter,7
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,common shiner,4
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,brown trout,2
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,river chub,78
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,creek chub,1
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,rosyface shiner,9
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,fallfish,19
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,blacknose dace,40
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,longnose dace,45
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,cutlips minnow,44
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,bluntnose minnow,27
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,tessellated darter,11
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,white sucker,53
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,Banded darter,3
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,central stoneroller,6
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,greenside darter,6
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,Smallmouth bass,2
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,pumpkinseed,1
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,rock bass,3
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,sculpin species,47
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,margined madtom,27
+Fish,1793,PINE000.0-00009,Backpack Electroshock,FISH-005,9/15/2010,0:15,northern hog sucker,2
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,margined madtom,4
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,blacknose dace,87
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,cutlips minnow,17
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,sculpin species,40
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,longnose dace,17
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,creek chub,1
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,tessellated darter,1
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,white sucker,2
+Fish,1774,GNSE000.0-00001,Backpack Electroshock,FISH-005,5/12/2011,15:00,brown trout,7
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,blacknose dace,172
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,creek chub,4
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,sculpin species,5
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,cutlips minnow,2
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,longnose dace,6
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,central stoneroller,2
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,bluntnose minnow,1
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,margined madtom,1
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,fallfish,1
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,smallmouth bass,2
+Fish,1771,BABB000.0-00001,Electroshock (Other),FISH-004,5/12/2011,10:30,brown trout,4
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,rainbow trout,1
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,rosyface shiner,8
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,mimic shiner,128
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,bluntnose minnow,14
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,longnose dace,23
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,white sucker,8
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,pumpkinseed,1
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,sculpin species,2
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,banded darter,240
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,tessellated darter,44
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,margined madtom,86
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,rock bass,31
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,northern hog sucker,8
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,smallmouth bass,29
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,central stoneroller,13
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,cutlips minnow,60
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,shield darter,3
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,blacknose dace,2
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,greenside darter,49
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,creek chub,2
+Fish,1832,PINE000.0-00010,Electroshock (Other),FISH-004,6/27/2011,0:00,fallfish,4
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,tessellated darter,40
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,fallfish,12
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,central stoneroller,7
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,white sucker,12
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,northern hog sucker,2
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,pumpkinseed,23
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,banded darter,5
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,chain pickerel,13
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,common shiner,2
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,bluntnose minnow,68
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,blacknose dace,7
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,longnose dace,9
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,rock bass,3
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,creek chub,5
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,cutlips minnow,1
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/28/2011,0:00,creek chubsucker,1
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,banded killifish,7
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,cutlips minnow,76
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,longnose dace,1
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,mimic shiner,172
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,banded darter,87
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,largemouth bass,1
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,bluntnose minnow,95
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,greenside darter,62
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,pumpkinseed,1
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,white sucker,7
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,northern hog sucker,31
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,rock bass,146
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,rosyface shiner,11
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,redbreast sunfish,88
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,spottail shiner,4
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,yellow bullhead,3
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,smallmouth bass,11
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,fallfish,13
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,central stoneroller,26
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,spotfin shiner,31
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,shield darter,8
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,comely shiner,2
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,tessellated darter,9
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,margined madtom,102
+Fish,1833,PINE000.0-00011,Electroshock (Other),FISH-004,8/4/2011,0:00,bluegill,2
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,common shiner,34
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,cutlips minnow,126
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,central stoneroller,9
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,sculpin species,63
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,white sucker,11
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,bluntnose minnow,3
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,river chub,1
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,longnose dace,38
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,brook trout,3
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,rainbow trout,1
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,creek chub,11
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,brown trout,7
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,tessellated darter,53
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,margined madtom,89
+Fish,1819,BLOCK00.0-00001,Electroshock (Other),FISH-004,11/2/2011,0:00,blacknose dace,191
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,11/2/2011,0:00,white sucker,5
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,11/2/2011,0:00,central stoneroller,30
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,11/2/2011,0:00,blacknose dace,5
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,11/2/2011,0:00,creek chub,89
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,11/2/2011,0:00,longnose dace,5
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,sculpin species,11
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,American eel,16
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,spottail shiner,20
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,river chub,400
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,brown trout,1
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,common shiner,299
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,northern hog sucker,11
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,cutlips minnow,383
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,central stoneroller,44
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,smallmouth bass,1
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,rock bass,10
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,greenside darter,108
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,redside dace,4
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,banded darter,32
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,fallfish,76
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,shield darter,22
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,mimic shiner,161
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,tessellated darter,37
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,margined madtom,212
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,creek chub,32
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,longnose dace,158
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,blacknose dace,103
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,bluntnose minnow,32
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,white sucker,244
+Fish,1898,PINE000.0-00012,Electroshock (Other),FISH-004,7/11/2012,0:00,rosyface shiner,122
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,greenside darter,187
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,mimic shiner,373
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,smallmouth bass,76
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,cutlips minnow,32
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,fallfish,26
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,banded killifish,10
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,fantail darter,1
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,redbreast sunfish,5
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,margined madtom,192
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,swallowtail shiner,1
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,white sucker,19
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,rock bass,85
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,green sunfish,16
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,rosyface shiner,17
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,bluegill,15
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,creek chub,6
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,central stoneroller,77
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,tessellated darter,75
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,American eel,1
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,spottail shiner,1
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,pumpkinseed,10
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,bluntnose minnow,115
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,longnose dace,23
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,shield darter,18
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,banded darter,532
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,spotfin shiner,34
+Fish,1899,PINE000.0-00013,Electroshock (Other),FISH-004,7/12/2012,0:00,northern hog sucker,48
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,fantail darter,1
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,bluegill,31
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,margined madtom,108
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,cutlips minnow,33
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,chain pickerel,3
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,creek chub,8
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,bluntnose minnow,13
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,mimic shiner,12
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,greenside darter,124
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,banded killifish,8
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,spotfin shiner,8
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,rosyface shiner,11
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,white sucker,13
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,tessellated darter,60
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,shield darter,11
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,American eel,1
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,northern hog sucker,8
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,rock bass,98
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,redbreast sunfish,118
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,green sunfish,16
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,pumpkinseed,4
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,smallmouth bass,292
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,central stoneroller,22
+Fish,1900,PINE000.0-00014,Electroshock (Other),FISH-004,7/13/2012,0:00,banded darter,197
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,common shiner,1
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,longnose dace,5
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,creek chub,2
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,margined madtom,41
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,greenside darter,83
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,bluntnose minnow,37
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,banded darter,153
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,smallmouth bass,72
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,tessellated darter,47
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,shield darter,11
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,rosyface shiner,1
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,sculpin species,2
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,central stoneroller,58
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,rock bass,10
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,white sucker,13
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,mimic shiner,106
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,green sunfish,1
+Fish,2064,PINE000.0-00017,Electroshock (Other),FISH-004,7/3/2014,14:00,cutlips minnow,61
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,spotfin shiner,13
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,central stoneroller,10
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,smallmouth bass,301
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,cutlips minnow,20
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,bluegill,2
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,pumpkinseed,5
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,green sunfish,3
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,redbreast sunfish,4
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,golden shiner,2
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,northern hog sucker,21
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,margined madtom,60
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,American eel,2
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,rock bass,78
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,rosyface shiner,4
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,mimic shiner,84
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,white sucker,231
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,bluntnose minnow,127
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,longnose dace,6
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,fallfish,37
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,banded killifish,2
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,greenside darter,50
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,tessellated darter,91
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,banded darter,109
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,yellow perch,1
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,shield darter,15
+Fish,1769,PINE000.0-00008,Electroshock (Other),FISH-004,8/4/2015,9:15,chain pickerel,1
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,spottail shiner,2
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,tessellated darter,64
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,margined madtom,2
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,chain pickerel,5
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,fallfish,2
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,creek chub,26
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,longnose dace,14
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,blacknose dace,10
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,American eel,8
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,bluntnose minnow,10
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,common shiner,4
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,cutlips minnow,1
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,central stoneroller,22
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,rock bass,1
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,white sucker,19
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,fathead minnow,3
+Fish,1827,MARSH00.0-00001,Backpack Electroshock,FISH-005,7/21/2015,12:45,greenside darter,3
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,10/1/2015,9:00,creek chub,34
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,10/1/2015,9:00,longnose dace,6
+Fish,1843,WILSN00.0-00001,Backpack Electroshock,FISH-005,10/1/2015,9:00,blacknose dace,13
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,white sucker,28
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,sculpin species,384
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,cutlips minnow,15
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,pearl dace,3
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,blacknose dace,270
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,longnose dace,53
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,brown trout,75
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,7/19/2012,10:00,brook trout,14
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,white sucker,17
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,sculpin species,179
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,cutlips minnow,21
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,blacknose dace,189
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,longnose dace,34
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,creek chub,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,brown trout,74
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,10/2/2012,13:00,brook trout,8
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,tessellated darter,27
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,blacknose dace,74
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,brown trout,1
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,rosyface shiner,3
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,shield darter,28
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,greenside darter,71
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,rock bass,9
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,banded darter,22
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,cutlips minnow,273
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,sculpin species,9
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,northern hog sucker,3
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,smallmouth bass,11
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,central stoneroller,2
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,common shiner,193
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,river chub,411
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,margined madtom,85
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,American eel,5
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,bluntnose minnow,34
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,mimic shiner,1
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,longnose dace,131
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,creek chub,1
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,fallfish,31
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,spottail shiner,4
+Fish,1923,PINE000.0-00015,Electroshock (Other),FISH-004,6/25/2012,9:30,white sucker,36
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,creek chub,4
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,shield darter,16
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,banded darter,37
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,tessellated darter,29
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,greenside darter,117
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,margined madtom,149
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,spottail shiner,1
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,American eel,5
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,rosyface shiner,18
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,longnose dace,177
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,blacknose dace,260
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,pumpkinseed,2
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,brown trout,2
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,bluntnose minnow,12
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,northern hog sucker,9
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,redbreast sunfish,1
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,smallmouth bass,3
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,sculpin species,4
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,cutlips minnow,284
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,common shiner,68
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,river chub,310
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,fallfish,3
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,white sucker,28
+Fish,1924,PINE000.0-00016,Electroshock (Other),FISH-004,6/25/2012,9:30,rock bass,7
+Fish,2023,WILIS00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,9:30,rainbow trout (hatchery),1
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,brown trout (hatchery),3
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,brown trout (wild),8
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,rainbow trout (hatchery),5
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,creek chub,1
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,longnose dace,10
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,blacknose dace,180
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,sculpin species,2
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,brook trout (hatchery),5
+Fish,2024,HARSN00.0-00001,Backpack Electroshock,FISH-005,5/30/2013,9:30,brook trout (wild),24
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,creek chub,29
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,brown bullhead,4
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,longnose dace,11
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,blacknose dace,49
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,bluntnose minnow,69
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,central stoneroller,99
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,largemouth bass,5
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,bluegill,4
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,pumpkinseed,5
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,white sucker,107
+Fish,2025,CHARL00.0-00001,Backpack Electroshock,FISH-005,5/29/2013,13:00,American eel,30
+Fish,2026,ROCK000.0-00001,Backpack Electroshock,FISH-005,6/17/2013,11:00,No Fish,No Fish
+Fish,2028,BABB000.0-00002,Backpack Electroshock,FISH-005,5/30/2013,14:00,golden shiner,1
+Fish,2028,BABB000.0-00002,Backpack Electroshock,FISH-005,5/30/2013,14:00,blacknose dace,140
+Fish,2028,BABB000.0-00002,Backpack Electroshock,FISH-005,5/30/2013,14:00,white sucker,5
+Fish,2028,BABB000.0-00002,Backpack Electroshock,FISH-005,5/30/2013,14:00,creek chub,72
+Fish,2029,DIXIE00.0-00001,Backpack Electroshock,FISH-005,6/17/2013,13:00,blacknose dace,77
+Fish,2029,DIXIE00.0-00001,Backpack Electroshock,FISH-005,6/17/2013,13:00,longnose dace,1
+Fish,2029,DIXIE00.0-00001,Backpack Electroshock,FISH-005,6/17/2013,13:00,brook trout (wild),134
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,white sucker,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,Scuplin species,281
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,cutlips minnow,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,pearl dace,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,fathead minnow,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,blacknose dace,155
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,longnose dace,9
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,creek chub,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,brook trout,10
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/20/2013,9:15,brown trout,15
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,northern hog sucker,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,Scuplin species,177
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,cutlips minnow,13
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,blacknose dace,151
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,longnose dace,5
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,creek chub,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,brown trout,25
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/17/2013,10:30,brook trout,16
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,brown trout (hatchery),1
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,bluntnose minnow,40
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,pumpkinseed,21
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,green sunfish,74
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,golden shiner,1
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,river chub,17
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,common shiner,3
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,cutlips minnow,66
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,spotfin shiner,8
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,bluegill,5
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,redbreast sunfish,4
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,rock bass,42
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,smallmouth bass,103
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,white sucker,11
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,American eel,2
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,sculpin species,52
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,central stoneroller,42
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,greenside darter,189
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,northern hog sucker,7
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,shield darter,3
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,yellow bullhead,1
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,chain pickerel,3
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,fallfish,151
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,longnose dace,46
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,margined madtom,10
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,fantail darter,93
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,rainbow trout (hatchery),3
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,tessellated darter,7
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,mimic shiner,10
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,blacknose dace,1
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,brown trout (wild),6
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,roseyface shiner,22
+Fish,92,LPIN000.2-4177,Electroshock (Other),FISH-004,8/3/2017,9:45,banded darter,126
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,northern hog sucker,1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,blacknose dace,533
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,white sucker,6
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,common shiner,11
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,cutlips minnow,98
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,central stoneroller,25
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,longnose dace,217
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,sculpin species,32
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,creek chub,7
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,river chub,40
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,brook trout (wild),1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,brown trout (wild),2
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,tessellated darter,17
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/21/2014,17:00,margined madtom,47
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,American eel,4
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,central stoneroller,25
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,redside dace,9
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,cutlips minnow,28
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,sculpin species,14
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,blacknose dace,98
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,common shiner,3
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,river chub,12
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,brown trout (wild),3
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,tessellated darter,10
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,greenside darter,1
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,margined madtom,19
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,brown bullhead,1
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,creek chub,16
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,longnose dace,43
+Fish,1666,ELKR000.5-4177,Backpack Electroshock,FISH-005,7/22/2014,13:00,white sucker,9
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,margined madtom,5
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,creek chub,22
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,brown trout (wild),7
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,blacknose dace,260
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,sculpin species,76
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,fathead minnow,1
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,river chub,1
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,cutlips minnow,22
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,redside dace,6
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,bluegill,1
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,American eel,2
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,longnose dace,45
+Fish,1731,LONG001.3-4177,Backpack Electroshock,FISH-005,7/22/2014,16:00,white sucker,4
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,mimic shiner,26
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,northern hog sucker,6
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,rock bass,13
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,pumpkinseed,1
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,smallmouth bass,106
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,sculpin species,34
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,central stoneroller,133
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,spotfin shiner,10
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,cutlips minnow,55
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,common shiner,2
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,white sucker,8
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,rosyface shiner,10
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,bluntnose minnow,10
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,longnose dace,51
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,fallfish,15
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,margined madtom,19
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,greenside darter,154
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,tessellated darter,18
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,banded darter,94
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,shield darter,3
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,rainbow trout (hatchery),1
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,brown trout (hatchery),1
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,river chub,12
+Fish,92,LPIN000.2-4177,Backpack Electroshock,FISH-005,7/21/2014,11:00,creek chub,1
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,longnose dace,16
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,fallfish,26
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,chain pickerel,26
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,margined madtom,25
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,greenside darter,10
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,banded darter,9
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,shield darter,12
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,bluntnose minnow,28
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,northern hog sucker,11
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,tessellated darter,65
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,mimic shiner,58
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,spottail shiner,14
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,river chub,8
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,common shiner,30
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,cutlips minnow,67
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,central stoneroller,1
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,pumpkinseed,25
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,rock bass,13
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,white sucker,120
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,brown trout (hatchery),1
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,American eel,32
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,redbreast sunfish,3
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,brown trout (wild),3
+Fish,1806,MARS001.5-4177,Electroshock (Other),FISH-004,7/22/2014,8:00,rainbow trout (hatchery),1
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,American eel,1
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,sculpin species,85
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,cutlips minnow,72
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,creek chub,11
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,longnose dace,99
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,blacknose dace,210
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,bluntnose minnow,4
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,river chub,49
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,common shiner,37
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,tessellated darter,10
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,white sucker,31
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,brown trout (wild),14
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,margined madtom,28
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,northern hog sucker,2
+Fish,1667,WPIN001.5-4177,Backpack Electroshock,FISH-005,7/23/2014,8:00,shield darter,2
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,American eel,32
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,white sucker,20
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,northern hog sucker,5
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,rock bass,8
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,redbreast sunfish,1
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,smallmouth bass,51
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,central stoneroller,31
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,cutlips minnow,285
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,common shiner,8
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,river chub,535
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,rosyface shiner,32
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,mimic shiner,31
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,bluntnose minnow,2
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,longnose dace,115
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,fallfish,15
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,margined madtom,229
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,greenside darter,49
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,tessellated darter,28
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,banded darter,97
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,shield darter,22
+Fish,1805,PINE048.8-4177,Electroshock (Other),FISH-004,9/2/2015,0:00,brown trout (hatchery),1
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,white sucker,6
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,blacknose dace,141
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,cutlips minnow,15
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,creek chub,1
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,brown trout (wild),144
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,brook trout (wild),13
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,longnose dace,7
+Fish,1810,NINE000.1-4177,Backpack Electroshock,FISH-005,10/3/2016,12:00,sculpin species,185
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,white sucker,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,blacknose dace,64
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,brook trout (wild),22
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,sculpin species,145
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,pumpkinseed,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,longnose dace,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,fathead minnow,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,cutlips minnow,3
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,6/16/2014,13:30,brown trout (wild),13
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,sculpin species,257
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,cutlips minnow,7
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,blacknose dace,135
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,pearl dace,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,white sucker,1
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,brown trout (wild),55
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,creek chub,2
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,longnose dace,17
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,brook trout (wild),22
+Fish,1811,PINE077.1-4177,Backpack Electroshock,FISH-005,9/23/2014,9:30,fathead minnow,1
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,margined madtom,80
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,longnose dace,7
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,banded darter,245
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,greenside darter,14
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,creek chub,7
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,cutlips minnow,8
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,rock bass,39
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,smallmouth bass,54
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,central stoneroller,18
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,northern hog sucker,11
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/10/2008,12:00,tessellated darter,20
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,central stoneroller,50
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,largemouth bass,2
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,smallmouth bass,67
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,bluegill,3
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,green sunfish,1
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,redbreast sunfish,8
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,northern hog sucker,3
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,white sucker,1
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,cutlips minnow,23
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,banded darter,77
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,rock bass,120
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,river chub,1
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,rosyface shiner,44
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,mimic shiner,17
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,bluntnose minnow,8
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,longnose dace,10
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,fallfish,27
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,margined madtom,28
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,shield darter,12
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,tessellated darter,10
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,American eel,1
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,spotfin shiner,16
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,greenside darter,70
+Fish,2107,PINE012.1-00000,Electroshock (Other),NA,9/16/2014,12:00,common shiner,2
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,cutlips minnow,6
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,white sucker,119
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,smallmouth bass,4
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,central stoneroller,539
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,common shiner,5
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,rosyface shiner,2
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,blacknose dace,249
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,longnose dace,152
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,creek chub,41
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,margined madtom,11
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,tessellated darter,9
+Fish,2111,PINE020.1-00000,Electroshock (Other),NA,9/9/2008,12:00,mottled sculpin,198
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,6/6/2013,12:00,mottled sculpin,44
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,6/6/2013,12:00,brook trout (wild),54
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,6/6/2013,12:00,brown trout (wild),42
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,6/6/2013,12:00,longnose dace,10
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,6/6/2013,12:00,blacknose dace,132
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,8/3/2009,12:00,brown trout (wild),14
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,8/3/2009,12:00,longnose dace,3
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,8/3/2009,12:00,blacknose dace,25
+Fish,2120,CEDR007.7-00000,Backpack Electroshock,NA,8/3/2009,12:00,mottled sculpin,12
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,spotfin shiner,3
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,American eel,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,longnose dace,31
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,blacknose dace,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,mimic shiner,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,rosyface shiner,25
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,spottail shiner,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,river chub,3
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,bluntnose minnow,57
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,central stoneroller,115
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,smallmouth bass,99
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,pumpkinseed,3
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,green sunfish,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,redbreast sunfish,1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,rock bass,70
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,white sucker,32
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,creek chub,2
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,golden shiner,4
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,northern hog sucker,35
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,cutlips minnow,66
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,fallfish,43
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,rainbow trout (hatchery),1
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,shield darter,31
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,tessellated darter,35
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,greenside darter,98
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,margined madtom,18
+Fish,2128,PINE029.1-00000,Electroshock (Other),NA,8/22/2013,12:00,banded darter,106
+Fish,2131,LONG001.2-00000,Backpack Electroshock,NA,6/5/2013,12:00,brook trout (wild),17
+Fish,2131,LONG001.2-00000,Backpack Electroshock,NA,6/5/2013,12:00,brown trout (wild),23
+Fish,2131,LONG001.2-00000,Backpack Electroshock,NA,6/5/2013,12:00,rainbow trout (wild),6
+Fish,2131,LONG001.2-00000,Backpack Electroshock,NA,6/5/2013,12:00,redside dace,2
+Fish,2131,LONG001.2-00000,Backpack Electroshock,NA,6/5/2013,12:00,American eel,2
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,central stoneroller,15
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,white sucker,19
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,sculpin species,50
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,cutlips minnow,113
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,common shiner,7
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,river chub,13
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,roseyface shiner,1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,blacknose dace,259
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,longnose dace,66
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,creek chub,19
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,margined madtom,17
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,tessellated darter,20
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,rainbow trout (hatchery),1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,brown trout (wild),8
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,7/17/2017,12:00,smallmouth bass,2
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,brook trout (hatchery),1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,blacknose dace,234
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,margined madtom,23
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,creek chub,97
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,longnose dace,107
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,tessellated darter,31
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,river chub,28
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,common shiner,48
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,cutlips minnow,161
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,central stoneroller,25
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,white sucker,15
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,brown trout (wild),12
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/12/2015,0:00,sculpin species,10
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,white sucker,21
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,northern hog sucker,2
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,rock bass,1
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,smallmouth bass,8
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,sculpin species,12
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,central stoneroller,116
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,cutlips minnow,98
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,common shiner,30
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,river chub,17
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,roseyface shiner,38
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,blacknose dace,201
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,longnose dace,60
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,creek chub,38
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,margined madtom,38
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,tessellated darter,23
+Fish,1669,BLOC001.3-4177,Backpack Electroshock,FISH-005,8/30/2016,12:00,brown trout (wild),2
