@@ -1,0 +1,365 @@
+---
+title: "Create dataframe from SRBC GitHub data"
+author: "Emily Wefelmeyer"
+date: "November 2, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Missing the chemistry data due to issue with duplicates that we need to determine how to clean.
+
+##Load libraries
+```{r}
+if (!require('RCurl')) install.packages('RCurl', quiet=TRUE)
+require(Rcurl)
+
+if (!require('readxl')) install.packages('readxl', quiet=TRUE)
+library(readxl)
+
+if (!require('dplyr')) install.packages('dplyr', quiet=TRUE)
+library(dplyr)
+
+if (!require('Hmisc')) install.packages('Hmisc', quiet=TRUE)
+library(Hmisc)
+
+if (!require("stringr")) install.packages("stringr", quiet = TRUE)
+library(stringr)
+
+if (!require("lubridate")) install.packages("lubridate", quiet = TRUE)
+library(lubridate)
+```
+
+##Import Excel files from Git
+###Function
+```{r}
+importGitHub <- function(url, skip){
+  df <- read.csv(text = getURL(url),
+                 skip = skip)
+  
+  return(df)
+}
+```
+
+#Chemistry Data prior to 2018
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekChemistry.csv"
+
+skip = 1
+
+colNames <- c("StationID",
+              "StationName",
+              "Date",
+              "Time",
+              "Parameter",
+              "Results",
+              "RDL")
+
+chemistry <- importGitHub(url, skip)
+
+colnames(chemistry) <- colNames
+
+rm(skip, url, colNames)
+
+describe(chemistry)
+str(chemistry)
+```
+
+Add additional chemistry data from 2018
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/2018PineHU.csv"
+
+skip = 1
+
+colNames <- c("StationID",
+              "StationName",
+              "Date",
+              "Time",
+              "Parameter",
+              "Results",
+              "RDL")
+
+temp <- importGitHub(url, skip)
+colnames(temp) <- colNames
+rm(colNames, skip, url)
+
+#Combine Chemistry data frames
+chemistry <- rbind(chemistry, temp)
+rm(temp)
+
+#Store the parameters & levels of those below quantification limit
+#ifelse(!is.na(chemistry$RDL), (belowQualificationLevel <- as.data.frame(cbind(as.character(chemistry$Parameter), chemistry$RDL))), temp <- chemistry$Parameter) 
+chemistry$Results <- ifelse(chemistry$Results ==
+                 "Present Below Quantification Limit", 
+               as.numeric(chemistry$RDL),
+               as.numeric(as.character(chemistry$Results)))
+chemistry$RDL = NULL  #Drop RDL since placed in results
+
+#Fix DateTime Stamp from import
+temp = t(as.data.frame(strsplit(as.character(chemistry$Time),' ')))
+rownames(temp)=NULL
+chemistry$Time <- temp
+rm(temp)
+
+chemistry$Date <- as.Date(chemistry$Date, format = "%m/%d/%Y")
+
+
+chemistry$DateTime <- as.POSIXct(paste(chemistry$Date,
+                                       chemistry$Time), 
+                                 format = "%Y-%m-%d %H:%M")
+
+#Remove redundent variables
+chemistry$Date <- NULL
+chemistry$Time <- NULL
+
+#Unstack
+if (!require('tidyr')) install.packages('tidyr', quiet=TRUE)
+library(tidyr)
+
+#chemistry2 <- spread(chemistry, 
+#                     Parameter, 
+#                     Results, 
+#                     fill = 0)
+
+#Issue with duplicates in all columns except results
+```
+Issue with duplicate parameters, etc.
+
+
+
+#Collect fish counts by date/time
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekFish.csv"
+
+skip <- 0
+
+fishCounts <- importGitHub(url, skip)
+rm(url, skip)
+
+describe(fishCounts)
+
+#Fix DateTime Stamp from import
+temp = t(as.data.frame(strsplit(as.character(fishCounts$Time),' ')))
+rownames(temp)=NULL
+fishCounts$Time <- temp
+rm(temp)
+
+fishCounts$Date <- as.Date(fishCounts$Date, format = "%m/%d/%Y")
+
+
+fishCounts$DateTime <- as.POSIXct(paste(fishCounts$Date, fishCounts$Time), format = "%Y-%m-%d %H:%M")
+
+#Convert fish names to all lowercase to avoid duplicates & some other data cleanup.
+fishCounts$Fish <- tolower(fishCounts$Fish)
+fishCounts$Fish <- gsub(" ", "_", fishCounts$Fish)
+fishCounts$Fish <- gsub("\\(", "", fishCounts$Fish)
+fishCounts$Fish <- gsub("\\)", "", fishCounts$Fish)
+fishCounts$Fish <- factor(fishCounts$Fish)
+
+#Convert counts to numeric
+fishCounts$County <- as.numeric(fishCounts$County)
+
+#Remove redundent variables
+fishCounts$Date <- NULL
+fishCounts$Time <- NULL
+
+
+#Drop unneeded variables dealing with how data was collected
+fishCounts$Activity <- NULL
+fishCounts$SRBC.Method <- NULL
+fishCounts$Gear <- NULL
+
+#Unstack
+if (!require('tidyr')) install.packages('tidyr', quiet=TRUE)
+library(tidyr)
+
+
+fishCounts2 <- spread(fishCounts, 
+                      Fish, 
+                      County,
+                      fill = 0)
+
+fishCounts2 <- as.data.frame(fishCounts2)
+
+summary(fishCounts2)
+```
+
+#Macro Counts
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekMacros.csv"
+skip = 0
+macroCounts <- importGitHub(url, skip)
+rm(url, skip)
+
+#Fix DateTime Stamp from import
+temp = t(as.data.frame(strsplit(as.character(macroCounts$Time),' ')))
+rownames(temp)=NULL
+macroCounts$Date <- as.Date(macroCounts$Date, 
+                            format = "%m/%d/%Y")
+macroCounts$Time <- temp
+rm(temp)
+
+macroCounts$DateTime <- as.POSIXct(paste(macroCounts$Date, macroCounts$Time), format = "%Y-%m-%d %H:%M")
+
+#Convert fish names to all lowercase to avoid duplicates & some other data cleanup.
+macroCounts$Macrostemum <- tolower(macroCounts$Macrostemum)
+macroCounts$Activity <- NULL
+macroCounts$SRBC.Method <- NULL
+macroCounts$Gear <- NULL
+
+#Remove redundent variables
+macroCounts$Date <- NULL
+macroCounts$Time <- NULL
+
+
+#Unstack
+macroCounts2 <- spread(macroCounts, 
+                       Macrostemum, 
+                       Count, 
+                       fill = 0)
+macroCounts2 <- as.data.frame(macroCounts2)
+attach(macroCounts2)
+
+summary(macroCounts2)
+```
+
+#Attribute site data
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/Pine_attributes.csv"
+
+skip = 1
+
+attributes <- importGitHub(url, skip)
+
+rm(url, skip)
+
+describe(attributes)
+```
+
+#Water Quality Measures
+```{r}
+url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/92_LittlePine_Cont.csv"
+
+skip = 3
+  
+micro <- importGitHub(url, skip)
+
+colnames(micro) <-  c("DateTime", 
+                      "O2Dis", 
+                      "pH", 
+                      "SpCond", 
+                      "Turbidity", 
+                      "WaterTemp")
+
+rm(url, skip)
+
+#Clean Date/Time
+temp = t(as.data.frame(strsplit(as.character(micro$DateTime),' ')))
+rownames(temp)=NULL
+micro$Date <- as.Date(temp[,1], 
+                      format = "%m/%d/%Y")
+micro$Time <- temp[,2]
+rm(temp)
+
+micro$DateTime <- as.POSIXct(paste(micro$Date, 
+                                   micro$Time), 
+                             format = "%Y-%m-%d %H:%M")
+
+#Remove redundent variables
+micro$Date <- NULL
+micro$Time <- NULL
+
+summary(micro)
+```
+
+
+#Combine to one data frame
+
+##Micro data added to full set of dates/times
+```{r}
+
+DateTime <- as.data.frame(seq(ISOdatetime(1983, 8, 10, 0, 0, 0, tz = "" ), 
+                ISOdatetime(2018, 10, 1, 0, 0, 0, tz = ""),
+                by = "4 hours"))
+colnames(DateTime) = "DateTime"
+
+StationID <- unique(chemistry$StationID)
+StationID <- as.numeric(StationID)
+
+fullData <- merge(DateTime, 
+                  micro, 
+                  by.x = "DateTime", 
+                  by.y = "DateTime", 
+                  all.x = TRUE)
+```
+
+##Combine fish count & macro count data
+Add chemistry data the same way once we have the correct format with the data frame.
+```{r}
+#Create initial data frame from varous pieces
+
+#chem <- subset(chemistry2, Station_ID == StationID[1])
+fish <- subset(fishCounts2, Station_ID == StationID[1])
+macro <- subset(macroCounts2, Station_ID == StationID[1])
+
+temp <- merge(fish,
+                macro,
+                by = "DateTime",
+                all = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(StationID[1], times = nrow(temp))
+temp$Station_ID.x <- NULL
+temp$Station_ID.y <- NULL
+
+data <- temp
+
+n = as.numeric(length(StationID))
+rm(temp)
+
+for(station in StationID[2:n]) {
+  # chem <- subset(chemistry2, Station_ID == Station_ID)
+  fish <- subset(fishCounts2, Station_ID == station)
+  macro <- subset(macroCounts2, Station_ID == station)
+  temp <- merge(fish,
+                macro,
+                by = "DateTime",
+                all = TRUE)
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+  temp$Station_ID.x <- NULL
+  temp$Station_ID.y <- NULL
+
+
+  ifelse(nrow(temp) > 0, 
+    (data[(nrow(data)+1):(nrow(data) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    data <- data)
+
+}
+
+fishMacroCounts <- data
+
+rm(data, fish, macro, n, station, temp)
+```
+
+
+##Combine micro df with fish & macro counts df
+```{r}
+fishMacroMicro <- merge(micro,
+                        fishMacroCounts,
+                        by = "DateTime",
+                        all = TRUE)
+```
+
+##Add attributes
+```{r}
+attributesFishMacroMicro <- merge(attributes,
+                                  fishMacroMicro,
+                                  by.x = "Station.ID",
+                                  by.y = "StationID",
+                                  all.y = TRUE)
+```
+
+
