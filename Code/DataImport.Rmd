@@ -43,7 +43,8 @@ importGitHub <- function(url, skip){
 }
 ```
 
-#Chemistry Data prior to 2018
+###Chemistry Data 
+####Load chemistry data prior to 2018
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekChemistry.csv"
 
@@ -67,7 +68,7 @@ describe(chemistry)
 str(chemistry)
 ```
 
-Add additional chemistry data from 2018
+####Add additional chemistry data from 2018
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/2018PineHU.csv"
 
@@ -87,16 +88,159 @@ rm(colNames, skip, url)
 
 #Combine Chemistry data frames
 chemistry <- rbind(chemistry, temp)
+
+chemistry <- unique(chemistry)
+
 rm(temp)
+```
 
+####Clean up chemistry data
+#####Clean parameters
+```{r}
+#Change from factors to characters
+chemistry$Parameter <- as.character(chemistry$Parameter)
+
+#Remove ","s
+chemistry$Parameter <- gsub(",", "", chemistry$Parameter)
+
+#Remove " - Field " from parameter names
+chemistry$Parameter <- gsub("- Field", "", chemistry$Parameter)
+
+#Remove "Total " from parameter names
+chemistry$Parameter <- gsub("Total", "", chemistry$Parameter)
+
+#Remove "TOT" from parameter names
+chemistry$Parameter <- gsub("TOT ", "", chemistry$Parameter)
+
+#Remove "T" from parameter names
+chemistry$Parameter <- gsub(" T ", " ", chemistry$Parameter)
+
+#Remove "D" from parameter names
+chemistry$Parameter <- gsub(" D ", " ", chemistry$Parameter)
+
+#Remove "Dissolved" from parameter names
+chemistry$Parameter <- gsub("Dissolved", "", chemistry$Parameter)
+
+#Remove spaces
+chemistry$Parameter <- gsub("  ", " ", chemistry$Parameter)
+
+#Remove "(None)" from pH
+chemistry$Parameter <- gsub("\\(None\\)", "", chemistry$Parameter)
+
+#Replace "Specific Con(umho/cm)" with "Specific Conductivity (umho/cm)"
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Specific Con (umho/cm)"] <- "Specific Conductivity (umho/cm)")
+
+#Replace "T Org Carbon" with "Carbon"
+chemistry$Parameter <- gsub("T Org Carbon", "Carbon", chemistry$Parameter)
+
+#Replace " Oxygen" with "Oxygen"
+chemistry$Parameter <- gsub(" Oxygen", "Oxygen", chemistry$Parameter)
+
+#Replace "Organic N" with "Nitrogen"
+chemistry$Parameter <- gsub("Organic N", "Nitrogen", chemistry$Parameter)
+
+#Replace "N" with "Nitrogen"
+chemistry$Parameter <- gsub(" N ", "Nitrogen", chemistry$Parameter)
+
+#Change "Aluminum (mg/l)" to "Aluminum (ug/l)"
+chemistry$Results <- ifelse((chemistry$Parameter == "Aluminum (mg/l)" & 
+                               is.numeric(chemistry$Results) == TRUE &  
+                               !is.na(chemistry$Results)), 
+                            chemistry$Results * 1000,
+                            chemistry$Results)
+
+chemistry$RDL <- ifelse((chemistry$Parameter == "Aluminum (mg/l)" & !is.na(chemistry$RDL)), 
+                            chemistry$RDL * 1000,
+                            chemistry$RDL)
+
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Aluminum (mg/l)"] <- "Aluminum (ug/l)")
+
+#Change "Barium (mg/l)" to "Barium (ug/l)"
+chemistry$Results <- ifelse((chemistry$Parameter == "Barium (mg/l)" & 
+                               is.numeric(chemistry$Results) == TRUE &  
+                               !is.na(chemistry$Results)), 
+                            chemistry$Results * 1000,
+                            chemistry$Results)
+  
+chemistry$RDL <- ifelse((chemistry$Parameter == "Barium (mg/l)" & !is.na(chemistry$RDL)), 
+                            chemistry$RDL * 1000,
+                            chemistry$RDL)
+
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Barium (mg/l)"] <- "Barium (ug/l)")
+
+
+#Change "Bromide (mg/l)" to "Bromide (ug/l)"
+chemistry$Results <- ifelse((chemistry$Parameter == "Bromide (mg/l)" & 
+                               is.numeric(chemistry$Results) == TRUE & 
+                               !is.na(chemistry$Results)), 
+                            chemistry$Results * 1000,
+                            chemistry$Results)
+  
+chemistry$RDL <- ifelse((chemistry$Parameter == "Bromide (mg/l)" & !is.na(chemistry$RDL)), 
+                            chemistry$RDL * 1000,
+                            chemistry$RDL)
+
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Bromide (mg/l)"] <- "Bromide (ug/l)")
+
+
+#Change "Iron (mg/l)" to "Iron (ug/l)"
+chemistry$Results <- ifelse((chemistry$Parameter == "Iron (mg/l)" & 
+                               is.numeric(chemistry$Results) == TRUE & 
+                               !is.na(chemistry$Results)), 
+                            chemistry$Results * 1000,
+                            chemistry$Results)
+
+chemistry$RDL <- ifelse((chemistry$Parameter == "Iron (mg/l)" & !is.na(chemistry$RDL)), 
+                            chemistry$RDL * 1000,
+                            chemistry$RDL)
+
+  
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Iron (mg/l)"] <- "Iron (ug/l)")
+
+
+#Change "Manganese (mg/l)" to "Manganese (ug/l)"
+chemistry$Results <- ifelse((chemistry$Parameter == "Manganese (mg/l)" & 
+                               is.numeric(chemistry$Results) == TRUE & 
+                               !is.na(chemistry$Results)), 
+                            chemistry$Results * 1000,
+                            chemistry$Results)
+
+chemistry$RDL <- ifelse((chemistry$Parameter == "Manganese (mg/l)" & !is.na(chemistry$RDL)), 
+                            chemistry$RDL * 1000,
+                            chemistry$RDL)
+    
+chemistry <- within(chemistry,
+                    Parameter[Parameter == "Manganese (mg/l)"] <- "Manganese (ug/l)")
+
+chemistry$Parameter <- as.factor(chemistry$Parameter)
+```
+
+#####Clean Results
+```{r}
 #Store the parameters & levels of those below quantification limit
-#ifelse(!is.na(chemistry$RDL), (belowQualificationLevel <- as.data.frame(cbind(as.character(chemistry$Parameter), chemistry$RDL))), temp <- chemistry$Parameter) 
 chemistry$Results <- ifelse(chemistry$Results ==
-                 "Present Below Quantification Limit", 
-               as.numeric(chemistry$RDL),
-               as.numeric(as.character(chemistry$Results)))
-chemistry$RDL = NULL  #Drop RDL since placed in results
+                              "Present Below Quantification Limit", 
+                            ifelse(is.na(chemistry$RDL),
+                                   chemistry$Results,
+                                   paste("<", chemistry$RDL, sep = "")),
+                            chemistry$Results)
 
+chemistry$Results <- ifelse(is.na(chemistry$Results),
+                            ifelse(is.na(chemistry$RDL),
+                                   chemistry$Results,
+                                   paste("<", chemistry$RDL, sep = "")),
+                            chemistry$Results)
+
+chemistry$RDL = NULL  #Drop RDL since placed in results
+```
+
+#####Fix date/time stamp
+```{r}
 #Fix DateTime Stamp from import
 temp = t(as.data.frame(strsplit(as.character(chemistry$Time),' ')))
 rownames(temp)=NULL
@@ -113,23 +257,48 @@ chemistry$DateTime <- as.POSIXct(paste(chemistry$Date,
 #Remove redundent variables
 chemistry$Date <- NULL
 chemistry$Time <- NULL
+```
 
+#####Remove duplicate rows
+````{r}
+##Remove duplicate rows
+#Idenfies duplicates in a new data frame
+duplicates <- chemistry[(duplicated(chemistry[c("StationID", "StationName", "Parameter", "DateTime")]) | duplicated(chemistry[c("StationID", "StationName", "Parameter", "DateTime")], fromLast = TRUE)), ]
+
+#Removes duplicates from data
+chemistry <- chemistry[!(duplicated(chemistry[c("StationID", "StationName", "Parameter", "DateTime")]) | duplicated(chemistry[c("StationID", "StationName", "Parameter", "DateTime")], fromLast = TRUE)), ]
+
+#Average duplicates by Date/Time, Station ID, Parameter
+duplicatesAveraged <- aggregate(Results ~ 
+                                  StationID +
+                                  StationName +
+                                  Parameter +
+                                  DateTime, 
+                                duplicates, 
+                                mean)
+
+#Add averaged duplicates back in
+chemistry <- rbind(chemistry, duplicatesAveraged)
+
+#Remove unneeded variables
+rm(duplicates, duplicatesAveraged)
+```
+
+#####Change to wide view
+```{r}
 #Unstack
 if (!require('tidyr')) install.packages('tidyr', quiet=TRUE)
 library(tidyr)
 
-#chemistry2 <- spread(chemistry, 
-#                     Parameter, 
-#                     Results, 
-#                     fill = 0)
+chemistry2 <- spread(chemistry, 
+                     Parameter, 
+                     Results, 
+                     fill = NA)
 
-#Issue with duplicates in all columns except results
+describe(chemistry2)
 ```
-Issue with duplicate parameters, etc.
 
-
-
-#Collect fish counts by date/time
+###Fish Counts
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekFish.csv"
 
@@ -186,7 +355,7 @@ fishCounts2 <- as.data.frame(fishCounts2)
 summary(fishCounts2)
 ```
 
-#Macro Counts
+###Macro Counts
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekMacros.csv"
 skip = 0
@@ -225,7 +394,7 @@ attach(macroCounts2)
 summary(macroCounts2)
 ```
 
-#Attribute site data
+###Attribute data for each site
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/Pine_attributes.csv"
 
@@ -238,7 +407,7 @@ rm(url, skip)
 describe(attributes)
 ```
 
-#Water Quality Measures
+###Water Quality Measures for entire system
 ```{r}
 url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/92_LittlePine_Cont.csv"
 
@@ -275,9 +444,8 @@ summary(micro)
 ```
 
 
-#Combine to one data frame
-
-##Micro data added to full set of dates/times
+##Combine to one data frame
+###Data frames redefined by actual date/time data using
 ```{r}
 
 DateTime <- as.data.frame(seq(ISOdatetime(1983, 8, 10, 0, 0, 0, tz = "" ), 
@@ -287,79 +455,115 @@ colnames(DateTime) = "DateTime"
 
 StationID <- unique(chemistry$StationID)
 StationID <- as.numeric(StationID)
+nStations = as.numeric(length(StationID))
 
-fullData <- merge(DateTime, 
+micro2 <- merge(DateTime, 
                   micro, 
                   by.x = "DateTime", 
                   by.y = "DateTime", 
                   all.x = TRUE)
+
+chemistry3 <- merge(DateTime,
+                    chemistry2,
+                    by.x = "DateTime",
+                    by.y = "DateTime")
 ```
 
-##Combine fish count & macro count data
-Add chemistry data the same way once we have the correct format with the data frame.
+###Combine chemistry, fish count & macro count data
 ```{r}
 #Create initial data frame from varous pieces
-
-#chem <- subset(chemistry2, Station_ID == StationID[1])
+chem <- subset(chemistry3, Station_ID == StationID[1])
 fish <- subset(fishCounts2, Station_ID == StationID[1])
 macro <- subset(macroCounts2, Station_ID == StationID[1])
 
+#Combine fish & macro counts
 temp <- merge(fish,
-                macro,
-                by = "DateTime",
-                all = TRUE)
+              macro,
+              by = "DateTime",
+              all = TRUE)
 
 #Clean to have unified station ID
 temp$StationID <- rep(StationID[1], times = nrow(temp))
 temp$Station_ID.x <- NULL
 temp$Station_ID.y <- NULL
 
-data <- temp
+#Add in chemistry
+temp <- merge(chem,
+              temp,
+              by = "DateTime",
+              all.x = TRUE,
+              all.y = TRUE)
 
-n = as.numeric(length(StationID))
+#Clean to have unified station ID
+temp$StationID <- rep(StationID[1], times = nrow(temp))
+temp$StationID.x <- NULL
+temp$StationID.y <- NULL
+
+#Create initial data frame
+data <- temp
 rm(temp)
 
-for(station in StationID[2:n]) {
-  # chem <- subset(chemistry2, Station_ID == Station_ID)
+#Combine rest of the data frames
+for(station in StationID[2:nStations]) {
+  chem <- subset(chemistry3, Station_ID == Station_ID)
   fish <- subset(fishCounts2, Station_ID == station)
   macro <- subset(macroCounts2, Station_ID == station)
+  
+  #Combine fish & macro counts
   temp <- merge(fish,
                 macro,
                 by = "DateTime",
                 all = TRUE)
+  
   #Clean to have unified station ID
   temp$StationID <- rep(station, times = nrow(temp))
   temp$Station_ID.x <- NULL
   temp$Station_ID.y <- NULL
 
+  #Add chemistry data
+  temp <- merge(chem,
+                temp,
+                by = "DateTime",
+                all.x = TRUE,
+                all.y = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+  temp$StationID.x <- NULL
+  temp$StationID.y <- NULL
 
+  #Add station's data to the full data set
   ifelse(nrow(temp) > 0, 
     (data[(nrow(data)+1):(nrow(data) + nrow(temp)),] <- temp[1:nrow(temp),]),
     data <- data)
-
 }
 
-fishMacroCounts <- data
+#rename data frame
+fishMacroCountsWithChem <- data
+rm(chem, data, fish, macro, nStations, station, temp)
 
-rm(data, fish, macro, n, station, temp)
+summary(fishMacroCountsWithChem)
 ```
 
 
 ##Combine micro df with fish & macro counts df
 ```{r}
-fishMacroMicro <- merge(micro,
-                        fishMacroCounts,
+chemFishMacroMicro <- merge(micro2,
+                        fishMacroCountsWithChem,
                         by = "DateTime",
                         all = TRUE)
+summary(chemFishMacroMicro)
 ```
 
 ##Add attributes
 ```{r}
-attributesFishMacroMicro <- merge(attributes,
-                                  fishMacroMicro,
-                                  by.x = "Station.ID",
-                                  by.y = "StationID",
-                                  all.y = TRUE)
+allData <- merge(attributes,
+                 chemFishMacroMicro,
+                 by.x = "Station.ID",
+                 by.y = "StationID",
+                 all.y = TRUE)
+
+summary(allData)
 ```
 
 
