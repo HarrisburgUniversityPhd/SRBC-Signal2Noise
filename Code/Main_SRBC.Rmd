@@ -1,0 +1,263 @@
+---
+title: "Main_SRBC"
+author: "Pranita Patil, Emily Wefelmeyer, Sridhar Ravula"
+date: "November 27, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+##Load libraries
+```{r}
+if (!require('RCurl')) install.packages('RCurl', quiet=TRUE)
+require(Rcurl)
+
+if (!require('readxl')) install.packages('readxl', quiet=TRUE)
+library(readxl)
+
+if (!require('dplyr')) install.packages('dplyr', quiet=TRUE)
+library(dplyr)
+
+if (!require('Hmisc')) install.packages('Hmisc', quiet=TRUE)
+library(Hmisc)
+
+if (!require("stringr")) install.packages("stringr", quiet = TRUE)
+library(stringr)
+
+if (!require("lubridate")) install.packages("lubridate", quiet = TRUE)
+library(lubridate)
+
+if (!require("rstudioapi")) install.packages("rstudioapi", quiet = TRUE)
+library(rstudioapi) 
+current_path <- getActiveDocumentContext()$path 
+setwd(dirname(current_path ))
+
+```
+
+##Import Excel files from Git
+###Function
+```{r}
+importGitHub <- function(url, skip){
+  df <- read.csv(text = getURL(url),
+                 skip = skip)
+  
+  return(df)
+}
+```
+
+###Chemistry Data 
+####Load chemistry data
+```{r}
+source("import_chemistry.R")
+chemistry2 <- import_chemistry()
+```
+
+###Fish Data 
+####Load Fish data
+```{r}
+source("import_fish.R")
+fish <- import_fish()
+fishCounts <- fish[[1]]
+fishCounts2 <- fish[[2]]
+```
+
+###Macro Counts
+```{r}
+source("import_macro.R")
+macroCounts2 <- import_macro()
+```
+
+###Attribute data for each site
+###Water Quality Measures for entire system
+```{r}
+source("import_attribute_micro.R")
+attribute_micro <- import_attribute_micro()
+attributes <- attribute_micro[[1]]
+micro <- attribute_micro[[2]]
+```
+
+### Calculate fish metrics
+```{r}
+source("Metrics_fish.R")
+fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
+```
+
+###Average high frequency data
+```{r}
+DateTime2 = seq.POSIXt(min(chemistry2$DateTime), max(chemistry2$DateTime), by='4 hour')
+
+DateTime <- as.data.frame(seq(ISOdatetime(1983, 8, 10, 0, 0, 0), 
+                ISOdatetime(2018, 10, 1, 0, 0, 0),
+                by = "4 hours"))
+colnames(DateTime) = "DateTime"
+
+StationID <- unique(chemistry2$StationID)
+StationID <- as.numeric(StationID)
+nStations = as.numeric(length(StationID))
+
+hourseq = seq.POSIXt(min(micro$DateTime), max(micro$DateTime), by='4 hour')
+microt<- micro %>%
+   group_by(DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+microt$DateTime <- as.POSIXct(microt$DateTime, 
+                             format = "%Y-%m-%d %H:%M")
+
+
+micro2 <- merge(DateTime, 
+                  microt, 
+                  by.x = "DateTime", 
+                  by.y = "DateTime", 
+                  all.x = TRUE)
+rm(hourseq,microt)
+
+
+hourseq = seq.POSIXt(min(chemistry2$DateTime), max(chemistry2$DateTime), by='4 hour')
+chemistry2t<- chemistry2 %>%
+   group_by(StationID, StationName,DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+chemistry2t$DateTime <- as.POSIXct(chemistry2t$DateTime, 
+                             format = "%Y-%m-%d %H:%M")
+chemistry3 <- merge(DateTime,
+                    chemistry2t,
+                    by.x = "DateTime",
+                    by.y = "DateTime")
+
+rm(hourseq,chemistry2t, DateTime, micro, chemistry2, DateTime2)
+```
+
+
+### Combine all Data frames
+```{r}
+###Combine chemistry, fish count & macro count data
+#Create initial data frame from varous pieces
+chem <- subset(chemistry3, StationID == StationID[1])
+fish <- subset(fishCounts2, StationID == StationID[1])
+macro <- subset(macroCounts2, Station_ID == StationID[1])
+
+#Combine fish & macro counts
+temp <- merge(fish,
+              macro,
+              by = "DateTime",
+              all = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(StationID[1], times = nrow(temp))
+temp$Station_ID.x <- NULL
+temp$Station_ID.y <- NULL
+
+#Add in chemistry
+temp <- merge(chem,
+              temp,
+              by = "DateTime",
+              all.x = TRUE,
+              all.y = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(StationID[1], times = nrow(temp))
+temp$StationID.x <- NULL
+temp$StationID.y <- NULL
+
+#Create initial data frame
+data <- temp
+rm(temp)
+
+#Combine rest of the data frames
+for(station in StationID[2:nStations]) {
+  chem <- subset(chemistry3, StationID == station)
+  fish <- subset(fishCounts2, StationID == station)
+  macro <- subset(macroCounts2, StationID == station)
+  
+  #Combine fish & macro counts
+  temp <- merge(fish,
+                macro,
+                by = "DateTime",
+                all = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+  temp$Station_ID.x <- NULL
+  temp$Station_ID.y <- NULL
+
+  #Add chemistry data
+  temp <- merge(chem,
+                temp,
+                by = "DateTime",
+                all.x = TRUE,
+                all.y = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+  temp$StationID.x <- NULL
+  temp$StationID.y <- NULL
+
+  #Add station's data to the full data set
+  ifelse(nrow(temp) > 0, 
+    (data[(nrow(data)+1):(nrow(data) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    data <- data)
+}
+
+#rename data frame
+fishMacroCountsWithChem <- data
+rm(chem, data, fish, macro, nStations, station, temp)
+
+##Combine micro df with fish & macro counts df
+chemFishMacroMicro <- merge(micro2,
+                        fishMacroCountsWithChem,
+                        by = "DateTime",
+                        all = TRUE)
+
+##Add attributes
+allData <- merge(attributes,
+                 chemFishMacroMicro,
+                 by.x = "Station.ID",
+                 by.y = "StationID",
+                 all.y = TRUE)
+
+summary(allData)
+
+
+##Remove unneed variables
+rm(StationID)
+```
+
+### Add communtity metrics from R package
+```{r}
+source("community_metrics.R")
+addData <- community_metrics()
+```
+
+
+### Calculate correlations
+```{r}
+source("Corr_SRBC.R")
+corr_results <- Corr_SRBC()
+```
+
+### Calculate PCA
+```{r}
+source("PCA_SRBC.R")
+PCA_results <- PCA_SRBC()
+```
+
+### Build GLM
+```{r}
+source("GLM_SRBC.R")
+GLM_results <- GLM_SRBC()
+```
+
+### Build GAM
+```{r}
+source("GAM_SRBC.R")
+GAM_results <- GAM_SRBC()
+```
+
+### combining GLM & GAM 
+```{r}
+source("GLM_GAM_SRBC.R")
+GLM_GAM_results <- GLM_GAM_SRBC()
+```
