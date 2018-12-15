@@ -35,6 +35,12 @@ library(rstudioapi)
 current_path <- getActiveDocumentContext()$path 
 setwd(dirname(current_path ))
 
+
+if (!require('mice')) install.packages('mice', quiet=TRUE)
+library(mice)
+
+if (!require('VIM')) install.packages('VIM', quiet=TRUE)
+library(VIM)
 ```
 
 ##Import Excel files from Git
@@ -62,13 +68,38 @@ source("import_fish.R")
 fish <- import_fish()
 fishCounts <- fish[[1]]
 fishCounts2 <- fish[[2]]
+
+aggr(fishCounts2,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(fishCounts2), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "FishCounts")
+
+(list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
 ```
 
 ###Macro Counts
 ```{r}
 source("import_macro.R")
 macroCounts2 <- import_macro()
+
+aggr(macroCounts2,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(macroCounts2), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "MacroCounts")
 ```
+No missing data
 
 ###Attribute data for each site
 ###Water Quality Measures for entire system
@@ -77,24 +108,50 @@ source("import_attribute_micro.R")
 attribute_micro <- import_attribute_micro()
 attributes <- attribute_micro[[1]]
 micro <- attribute_micro[[2]]
+
+aggr(attributes,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(attributes), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Attributes")
+
+(list_na <- colnames(attributes)[ apply(attributes, 2, anyNA)])
 ```
+Missing data not causing issue
 
 ### Calculate fish metrics
 ```{r}
 source("Metrics_fish.R")
 fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
+
+aggr(fishCounts2,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(fishCounts2), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "FishCounts")
+
+(list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
+
 ```
 
 ###Average high frequency data
 ```{r}
-DateTime2 = seq.POSIXt(min(chemistry2$DateTime), max(chemistry2$DateTime), by='4 hour')
-
 DateTime <- as.data.frame(seq(ISOdatetime(1983, 8, 10, 0, 0, 0), 
                 ISOdatetime(2018, 10, 1, 0, 0, 0),
                 by = "4 hours"))
 colnames(DateTime) = "DateTime"
 
-StationID <- unique(chemistry2$StationID)
+StationID <- unique(c(chemistry2$StationID, micro$StationID))
 StationID <- as.numeric(StationID)
 nStations = as.numeric(length(StationID))
 
@@ -127,17 +184,69 @@ chemistry3 <- merge(DateTime,
                     by.x = "DateTime",
                     by.y = "DateTime")
 
-rm(hourseq,chemistry2t, DateTime, micro, chemistry2, DateTime2)
+rm(hourseq,chemistry2t, DateTime, micro, chemistry2)
 ```
+
+#Check missing data
+```{r}
+aggr(chemistry3,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(chemistry3), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Chemistry")
+
+(list_na <- colnames(chemistry3)[ apply(chemistry3, 2, anyNA)])
+
+chemistry3$CountNA <- apply(chemistry3, MARGIN = 1, function(x) sum(is.na(x)))
+chemistry3 <- chemistry3[!(chemistry3$CountNA == 52), ]
+chemistry3$CountNA <- NULL
+```
+
+```{r}
+aggr(micro2,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(micro2), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Micro")
+
+(list_na <- colnames(micro2)[ apply(micro2, 2, anyNA)])
+
+micro2$CountNA <- apply(micro2, MARGIN = 1, function(x) sum(is.na(x)))
+micro2 <- micro2[!(micro2$CountNA == 5), ]
+micro2$CountNA <- NULL
+```
+
+
 
 
 ### Combine all Data frames
 ```{r}
+#Rename StationID#s for consistency
+macroCounts2$StationID <- macroCounts2$Station_ID
+macroCounts2$Station_ID <- NULL
+
+attributes$StationID <- attributes$Station.ID
+attributes$Station.ID <- NULL
+```
+
+```{r}
+Station = as.integer(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID, attributes$StationID))))
+
 ###Combine chemistry, fish count & macro count data
 #Create initial data frame from varous pieces
-chem <- subset(chemistry3, StationID == StationID[1])
-fish <- subset(fishCounts2, StationID == StationID[1])
-macro <- subset(macroCounts2, Station_ID == StationID[1])
+chem <- subset(chemistry3, StationID == Station[1])
+fish <- subset(fishCounts2, StationID == Station[1])
+macro <- subset(macroCounts2, StationID == Station[1])
 
 #Combine fish & macro counts
 temp <- merge(fish,
@@ -145,20 +254,14 @@ temp <- merge(fish,
               by = "DateTime",
               all = TRUE)
 
-#Clean to have unified station ID
-temp$StationID <- rep(StationID[1], times = nrow(temp))
-temp$Station_ID.x <- NULL
-temp$Station_ID.y <- NULL
-
 #Add in chemistry
 temp <- merge(chem,
               temp,
               by = "DateTime",
-              all.x = TRUE,
-              all.y = TRUE)
+              all = TRUE)
 
 #Clean to have unified station ID
-temp$StationID <- rep(StationID[1], times = nrow(temp))
+temp$StationID <- rep(Station[1], times = nrow(temp))
 temp$StationID.x <- NULL
 temp$StationID.y <- NULL
 
@@ -167,7 +270,7 @@ data <- temp
 rm(temp)
 
 #Combine rest of the data frames
-for(station in StationID[2:nStations]) {
+for(station in Station[2:length(Station)]) {
   chem <- subset(chemistry3, StationID == station)
   fish <- subset(fishCounts2, StationID == station)
   macro <- subset(macroCounts2, StationID == station)
@@ -178,17 +281,12 @@ for(station in StationID[2:nStations]) {
                 by = "DateTime",
                 all = TRUE)
   
-  #Clean to have unified station ID
-  temp$StationID <- rep(station, times = nrow(temp))
-  temp$Station_ID.x <- NULL
-  temp$Station_ID.y <- NULL
-
+  
   #Add chemistry data
   temp <- merge(chem,
                 temp,
                 by = "DateTime",
-                all.x = TRUE,
-                all.y = TRUE)
+                all = TRUE)
   
   #Clean to have unified station ID
   temp$StationID <- rep(station, times = nrow(temp))
@@ -202,33 +300,26 @@ for(station in StationID[2:nStations]) {
 }
 
 #rename data frame
-fishMacroCountsWithChem <- data
-rm(chem, data, fish, macro, nStations, station, temp)
+fishMacroChem <- data
+rm(chem, data, fish, macro, temp)
 
 ##Combine micro df with fish & macro counts df
 chemFishMacroMicro <- merge(micro2,
-                        fishMacroCountsWithChem,
+                        fishMacroChem,
                         by = "DateTime",
                         all = TRUE)
 
 ##Add attributes
 allData <- merge(attributes,
                  chemFishMacroMicro,
-                 by.x = "Station.ID",
-                 by.y = "StationID",
-                 all.y = TRUE)
+                 by = "StationID",
+                 all = TRUE)
 
 summary(allData)
 
 
 ##Remove unneed variables
-rm(StationID)
-```
-
-### Add communtity metrics from R package
-```{r}
-source("community_metrics.R")
-addData <- community_metrics()
+rm(Station)
 ```
 
 

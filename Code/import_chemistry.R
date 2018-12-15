@@ -23,10 +23,6 @@ import_chemistry <- function() {
   
   rm(skip, url, colNames)
   
-  describe(chemistry)
-  str(chemistry)
-  
-  
   ####Add additional chemistry data from 2018
   
   url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/2018PineHU.csv"
@@ -48,7 +44,7 @@ import_chemistry <- function() {
   #Combine Chemistry data frames
   chemistry <- rbind(chemistry, temp)
   
-  chemistry <- unique(chemistry)
+  
   
   rm(temp)
   
@@ -93,6 +89,9 @@ import_chemistry <- function() {
   #Replace "T Org Carbon" with "Carbon"
   chemistry$Parameter <- gsub("T Org Carbon", "Carbon", chemistry$Parameter)
   
+  #Replace "Alkalinity Bivarbonate" with "Alkalinity"
+  chemistry$Parameter <- gsub("Alkalinity Bicarbonate", "Alkalinity", chemistry$Parameter)
+  
   #Replace " Oxygen" with "Oxygen"
   chemistry$Parameter <- gsub(" Oxygen", "Oxygen", chemistry$Parameter)
   
@@ -101,6 +100,20 @@ import_chemistry <- function() {
   
   #Replace "N" with "Nitrogen"
   chemistry$Parameter <- gsub(" N ", "Nitrogen", chemistry$Parameter)
+
+  #Replace "Nitrite-N" with "Nitrite"
+  chemistry$Parameter <- gsub("Nitrite-N", "Nitrite", chemistry$Parameter)
+  
+    
+  #Combine Nitrogen(mg/l) with Nitrogen (mg/l)
+  chemistry <- within(chemistry,
+                      Parameter[Parameter == "Nitrogen(mg/l)"] <- "Nitrogen (mg/l)")
+  
+  #Replace "P Ortho Diss (mg/l)" with "Orthophospate (mg/l)
+  chemistry <- within(chemistry,
+                      Parameter[Parameter == "P Ortho Diss (mg/l)"] <- "Orthophosphate (mg/l)")
+  
+  
   
   #Change "Aluminum (mg/l)" to "Aluminum (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Aluminum (mg/l)" & 
@@ -178,7 +191,7 @@ import_chemistry <- function() {
   
   chemistry$Parameter <- as.factor(chemistry$Parameter)
   
-  
+  chemistry <- unique(chemistry)
   #####Clean Results
   
   #Store the parameters & levels of those below quantification limit
