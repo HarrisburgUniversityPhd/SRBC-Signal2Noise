@@ -8,15 +8,13 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+Framework created by Pranita Patil.
 
 ##Load libraries
+Emily Wefelmeyer
 ```{r}
 if (!require('RCurl')) install.packages('RCurl', quiet=TRUE)
 require(Rcurl)
-
-if (!require('readxl')) install.packages('readxl', quiet=TRUE)
-library(readxl)
 
 if (!require('dplyr')) install.packages('dplyr', quiet=TRUE)
 library(dplyr)
@@ -32,9 +30,6 @@ library(lubridate)
 
 if (!require("rstudioapi")) install.packages("rstudioapi", quiet = TRUE)
 library(rstudioapi) 
-current_path <- getActiveDocumentContext()$path 
-setwd(dirname(current_path ))
-
 
 if (!require('mice')) install.packages('mice', quiet=TRUE)
 library(mice)
@@ -45,6 +40,7 @@ library(VIM)
 
 ##Import Excel files from Git
 ###Function
+Emily Wefelmeyer
 ```{r}
 importGitHub <- function(url, skip){
   df <- read.csv(text = getURL(url),
@@ -56,6 +52,7 @@ importGitHub <- function(url, skip){
 
 ###Chemistry Data 
 ####Load chemistry data
+Emily Wefelmeyer
 ```{r}
 source("import_chemistry.R")
 chemistry2 <- import_chemistry()
@@ -63,6 +60,7 @@ chemistry2 <- import_chemistry()
 
 ###Fish Data 
 ####Load Fish data
+Emily Wefelmeyer
 ```{r}
 source("import_fish.R")
 fish <- import_fish()
@@ -84,6 +82,7 @@ aggr(fishCounts2,
 ```
 
 ###Macro Counts
+Emily Wefelmeyer
 ```{r}
 source("import_macro.R")
 macroCounts2 <- import_macro()
@@ -103,6 +102,7 @@ No missing data
 
 ###Attribute data for each site
 ###Water Quality Measures for entire system
+Emily Wefelmeyer
 ```{r}
 source("import_attribute_micro.R")
 attribute_micro <- import_attribute_micro()
@@ -125,6 +125,7 @@ aggr(attributes,
 Missing data not causing issue
 
 ### Calculate fish metrics
+Emily Wefelmeyer
 ```{r}
 source("Metrics_fish.R")
 fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
@@ -141,7 +142,6 @@ aggr(fishCounts2,
      main = "FishCounts")
 
 (list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
-
 ```
 
 ###Average high frequency data
@@ -189,6 +189,7 @@ rm(hourseq,chemistry2t, DateTime, micro, chemistry2)
 ```
 
 #Check missing data
+Emily Wefelmeyer
 ```{r}
 aggr(chemistry3,
      col = c("navyblue", 
@@ -207,7 +208,7 @@ chemistry3$CountNA <- apply(chemistry3, MARGIN = 1, function(x) sum(is.na(x)))
 chemistry3 <- chemistry3[!(chemistry3$CountNA == 52), ]
 chemistry3$CountNA <- NULL
 ```
-
+Emily Wefelmeyer
 ```{r}
 aggr(micro2,
      col = c("navyblue", 
@@ -229,6 +230,7 @@ micro2$CountNA <- NULL
 
 
 ### Combine all Data frames
+Emily Wefelmeyer
 ```{r}
 #Rename StationID#s for consistency
 macroCounts2$StationID <- macroCounts2$Station_ID
@@ -236,9 +238,7 @@ macroCounts2$Station_ID <- NULL
 
 attributes$StationID <- attributes$Station.ID
 attributes$Station.ID <- NULL
-```
 
-```{r}
 Station = as.integer(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID, attributes$StationID))))
 
 ###Combine chemistry, fish count & macro count data
@@ -324,6 +324,7 @@ rm(Station)
 ###Variance within variables
 Igor Pilja
 ```{r}
+if (!require('assertthat')) install.packages('assertthat', quiet=TRUE)
 library(assertthat)
 clmnNamesList<-c(colnames(allData))
 newList1 <- c()
@@ -392,10 +393,146 @@ for (i in 1:(length(allData))) {
   plot(allData$pH)
 ```
 
+### Calculate Correlaton between FishCount and Fish metrics
+Pranita Patil
+```{r}
+if (!require('ggplot2')) install.packages('ggplot2', quiet=TRUE)
+library(ggplot2)
+if (!require('reshape2')) install.packages('reshape2', quiet=TRUE)
+library(reshape2)
+
+
+# Calculate Correlation matrix for fish data along with fish metrics
+allData3 <- fishCounts2[,-c(1:2, 63)]
+
+corre_ent3 <- rcorr(as.matrix(allData3))
+
+cor_coef3 <- corre_ent3$r
+cor_p3 <- corre_ent3$P
+
+# function to visualize correlation matrix
+ggheatmap <- function(upper_tri, upper_tri_p, i) 
+{
+  # Melt the correlation matrix
+diag(upper_tri_p) <- Inf
+  melted_cormat <- melt(upper_tri)
+melted_cormat_p <- melt(upper_tri_p)
+melted_cormat_stars <- cut(melted_cormat_p$value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+ggheatmap1 <-ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+                       midpoint = 0, limit = c(-1,1), space = "Lab",
+                       name="Pearson\nCorrelation") +
+  geom_text(aes(label=melted_cormat_stars), color="black", size=2) +
+  geom_tile(data = subset(melted_cormat,  is.na(value)),fill = "white")+
+  geom_tile(data = subset(melted_cormat_p,  is.na(value)),fill = "white")+
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 9, hjust = 1))+
+  coord_fixed()
+
+# Print the heatmap
+print(ggheatmap1)
+ggsave(ggheatmap1, file=paste0("plot_corr_fish_data", i,".png"), width = 20, height = 20, units = "cm")
+
+}
+
+# Visualize Correlation matrix as whole 
+rcoeff <-(cor_coef3)
+rpvalue <- (cor_p3)
+ggheatmap(rcoeff, rpvalue, 1)
+
+# Visualize above Correlation matrix in two parts for visibility
+rcoeff1 <-(cor_coef3[1:30,31:60])
+rpvalue1 <- (cor_p3[1:30,31:60])
+ggheatmap(rcoeff1, rpvalue1, 2)
+
+rcoeff2 <-(cor_coef3[31:60,31:60])
+rpvalue2 <- (cor_p3[31:60,31:60])
+ggheatmap(rcoeff2, rpvalue2, 3)
+
+
+```
+
 ### Calculate correlations
+Pranita Patil
 ```{r}
 source("Corr_SRBC.R")
-corr_results <- Corr_SRBC()
+corr_results <- Corr_SRBC(allData)
+
+# correlation Coefficients and P values
+cor_coef2 <- corr_results[[1]]
+cor_p2 <- corr_results[[2]]
+
+# # Use upper triangle of the correlation matrix
+# get_upper_tri <- function(cormat){
+#   cormat[lower.tri(cormat)]<- NA
+#   return(cormat)
+# }
+
+
+k=1
+# corplots = list()
+
+for (i in seq(1, 151, by=31))
+  for (j in seq(1, 151, by=31))
+{
+    # get whole correlation matrix
+    if(i==125 & j!=125){
+    upper_tri <- (cor_coef2[i:(i+26),j:(j+30)])
+    upper_tri_p <- (cor_p2[i:(i+26),j:(j+30)])  
+    }
+    else if(j==125 & i!=125){
+      upper_tri <- (cor_coef2[i:(i+30),j:(j+26)])
+      upper_tri_p <- (cor_p2[i:(i+30),j:(j+26)]) 
+    }
+    else if(j==125 & i==125){
+      upper_tri <- (cor_coef2[i:(i+26),j:(j+26)])
+      upper_tri_p <- (cor_p2[i:(i+26),j:(j+26)]) 
+    }
+    else{
+    upper_tri <- (cor_coef2[i:(i+30),j:(j+30)])
+    upper_tri_p <- (cor_p2[i:(i+30),j:(j+30)])
+    }
+    if(k==1 | k==7 | k==13 | k==19 | k==25 ){
+      diag(upper_tri_p) <- Inf
+    }
+    # Melt the correlation matrix
+    melted_cormat <- melt(upper_tri)
+    melted_cormat_p <- melt(upper_tri_p)
+    melted_cormat_stars <- cut(melted_cormat_p$value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))  
+    
+    # Use ggplot to visualize correlation matrix
+    ggheatmap2 <-ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+      geom_tile(color = "white")+
+      scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+                           midpoint = 0, limit = c(-1,1), space = "Lab",
+                           name="Pearson\nCorrelation") +
+      geom_text(aes(label=melted_cormat_stars), color="black", size=2) +
+      geom_tile(data = subset(melted_cormat,  is.na(value)),fill = "white")+
+      geom_tile(data = subset(melted_cormat_p,  is.na(value)),fill = "white")+
+      theme_minimal()+ # minimal theme
+      theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                       size = 9, hjust = 1))+
+      coord_fixed()
+    
+    # Print the heatmap
+    print(ggheatmap2)
+    
+    # save the heatmap
+    ggsave(ggheatmap2, file=paste0("AllData_Corr_plot_", k,".png"), width = 20, height = 20, units = "cm")
+
+ #corplots[[k]] = ggheatmap2
+ k=k+1
+
+}
+
+## To save all images in PDF file
+# pdf("corr_plots.pdf")
+# for (l in 1:25) {
+#   print(corplots[[l]])
+# }
+# dev.off()
 ```
 
 ### Calculate PCA
