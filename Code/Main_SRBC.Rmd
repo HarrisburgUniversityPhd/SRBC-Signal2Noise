@@ -229,7 +229,9 @@ micro2$CountNA <- NULL
 ```
 
 
-### Combine all Data frames
+
+
+####Rename StationIDs for consistency
 Emily Wefelmeyer
 ```{r}
 #Rename StationID#s for consistency
@@ -238,8 +240,12 @@ macroCounts2$Station_ID <- NULL
 
 attributes$StationID <- attributes$Station.ID
 attributes$Station.ID <- NULL
+```
 
-Station = as.integer(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID, attributes$StationID))))
+### Combine all Data frames
+Emily Wefelmeyer
+```{r}
+Station = as.integer(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
 
 ###Combine chemistry, fish count & macro count data
 #Create initial data frame from varous pieces
@@ -261,8 +267,6 @@ temp <- merge(chem,
 
 #Clean to have unified station ID
 temp$StationID <- rep(Station[1], times = nrow(temp))
-temp$StationID.x <- NULL
-temp$StationID.y <- NULL
 
 #Create initial data frame
 data <- temp
@@ -289,8 +293,6 @@ for(station in Station[2:length(Station)]) {
   
   #Clean to have unified station ID
   temp$StationID <- rep(station, times = nrow(temp))
-  temp$StationID.x <- NULL
-  temp$StationID.y <- NULL
 
   #Add station's data to the full data set
   ifelse(nrow(temp) > 0, 
@@ -299,19 +301,39 @@ for(station in Station[2:length(Station)]) {
 }
 
 #rename data frame
+data$StationID.x <- NULL
+data$StationID.y <- NULL
+
 fishMacroChem <- data
 rm(chem, data, fish, macro, temp)
 
-##Combine micro df with fish & macro counts df
-chemFishMacroMicro <- merge(micro2,
-                        fishMacroChem,
-                        by = "DateTime",
-                        all = TRUE)
 
 ##Add attributes
-allData <- merge(attributes,
-                 chemFishMacroMicro,
-                 by = "StationID",
+fishMacroChemAttr <- merge(attributes,
+                           fishMacroChem,
+                           by = "StationID",
+                           all.y = TRUE)
+
+
+#Prep Micro data
+Station <- as.integer(sort(unique(fishMacroChemAttr$StationID)))
+dup <- micro2
+StationID <- rep(Station[1], times = nrow(dup))
+micro2 <- cbind(dup, StationID)
+
+for (station in Station[2:length(Station)]){
+  StationID <- rep(station, times = nrow(dup))
+  temp <- cbind(dup, StationID)
+  micro2 <- rbind(micro2, temp)
+  rm(temp)
+}
+
+rm(dup)
+
+##Combine micro df with fish & macro counts df
+allData <- merge(micro2,
+                 fishMacroChemAttr,
+                 by = c("DateTime", "StationID"),
                  all = TRUE)
 
 summary(allData)
