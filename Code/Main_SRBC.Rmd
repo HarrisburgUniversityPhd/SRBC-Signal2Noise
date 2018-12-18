@@ -169,10 +169,8 @@ microt$DateTime <- as.POSIXct(microt$DateTime,
 micro2 <- merge(DateTime, 
                   microt, 
                   by = "DateTime")
-rm(hourseq,microt)
+rm(microt)
 
-
-hourseq = seq.POSIXt(min(chemistry2$DateTime), max(chemistry2$DateTime), by='4 hour')
 chemistry2t<- chemistry2 %>%
    group_by(StationID, StationName,DateTime = cut(DateTime, breaks=hourseq)) %>%
    summarise_all(mean)  %>% drop_na(DateTime)
@@ -465,7 +463,6 @@ rcoeff2 <-(cor_coef3[31:60,31:60])
 rpvalue2 <- (cor_p3[31:60,31:60])
 ggheatmap(rcoeff2, rpvalue2, 3)
 
-
 ```
 
 ### Calculate correlations
@@ -547,6 +544,9 @@ for (i in seq(1, 151, by=31))
 #   print(corplots[[l]])
 # }
 # dev.off()
+
+
+rm(rpvalue, rcoeff, allData3, rpvalue1, rcoeff1, rpvalue2, rcoeff2, upper_tri_p, corre_ent3, cor_coef3, cor_p3, cor_coef2, corr_results, cor_p2, ggheatmap2, melted_cormat, melted_cormat_p, melted_cormat_stars, i, j, upper_tri)
 ```
 
 ### Calculate PCA
