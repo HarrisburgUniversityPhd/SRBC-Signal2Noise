@@ -80,6 +80,7 @@ aggr(fishCounts2,
 
 (list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
 ```
+No missing data
 
 ###Macro Counts
 Emily Wefelmeyer
@@ -109,6 +110,8 @@ attribute_micro <- import_attribute_micro()
 attributes <- attribute_micro[[1]]
 micro <- attribute_micro[[2]]
 
+rm(attribute_micro)
+
 aggr(attributes,
      col = c("navyblue", 
              "yellow"),
@@ -129,34 +132,32 @@ Emily Wefelmeyer
 ```{r}
 source("Metrics_fish.R")
 fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
-
-aggr(fishCounts2,
-     col = c("navyblue", 
-             "yellow"),
-     numbers = TRUE, 
-     sortVars = TRUE,
-     labels = names(fishCounts2), 
-     cex.axis = 0.7,
-     gap = 3, 
-     ylab = c("Missing Data", "Pattern"), 
-     main = "FishCounts")
-
-(list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
 ```
+
+####Fix TimeDate stamps
+Subset dataframes by DTS
+```{r}
+startDate <- as.numeric(year(max(min(fishCounts2$DateTime), 
+                 min(macroCounts2$DateTime))))
+
+startDate <- as.POSIXct(ISOdate(startDate, 01, 01, 0, 0, 0))
+
+endDate <- as.numeric(year(min(max(fishCounts2$DateTime),
+               max(macroCounts2$DateTime))))
+
+endDate <- as.POSIXct(ISOdate(endDate, 12, 31, 23, 59, 59))
+
+#DateTime
+DateTime <- as.data.frame(seq.POSIXt(startDate, endDate, by = "4 hours"))
+colnames(DateTime) <- "DateTime"
+```
+
+
 
 ###Average high frequency data
 Sridhar Ravula
 ```{r}
-DateTime <- as.data.frame(seq(ISOdatetime(1983, 8, 10, 0, 0, 0), 
-                ISOdatetime(2018, 10, 1, 0, 0, 0),
-                by = "4 hours"))
-colnames(DateTime) = "DateTime"
-
-StationID <- unique(c(chemistry2$StationID, micro$StationID))
-StationID <- as.numeric(StationID)
-nStations = as.numeric(length(StationID))
-
-hourseq = seq.POSIXt(min(micro$DateTime), max(micro$DateTime), by='4 hour')
+hourseq = seq.POSIXt(startDate, endDate, by='4 hour')
 microt<- micro %>%
    group_by(DateTime = cut(DateTime, breaks=hourseq)) %>%
    summarise_all(mean)  %>% drop_na(DateTime)
@@ -167,9 +168,7 @@ microt$DateTime <- as.POSIXct(microt$DateTime,
 
 micro2 <- merge(DateTime, 
                   microt, 
-                  by.x = "DateTime", 
-                  by.y = "DateTime", 
-                  all.x = TRUE)
+                  by = "DateTime")
 rm(hourseq,microt)
 
 
@@ -182,8 +181,7 @@ chemistry2t$DateTime <- as.POSIXct(chemistry2t$DateTime,
                              format = "%Y-%m-%d %H:%M")
 chemistry3 <- merge(DateTime,
                     chemistry2t,
-                    by.x = "DateTime",
-                    by.y = "DateTime")
+                    by = "DateTime")
 
 rm(hourseq,chemistry2t, DateTime, micro, chemistry2)
 ```
@@ -226,10 +224,9 @@ aggr(micro2,
 micro2$CountNA <- apply(micro2, MARGIN = 1, function(x) sum(is.na(x)))
 micro2 <- micro2[!(micro2$CountNA == 5), ]
 micro2$CountNA <- NULL
+
+rm(list_na)
 ```
-
-
-
 
 ####Rename StationIDs for consistency
 Emily Wefelmeyer
@@ -245,7 +242,7 @@ attributes$Station.ID <- NULL
 ### Combine all Data frames
 Emily Wefelmeyer
 ```{r}
-Station = as.integer(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
+Station = as.numeric(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
 
 ###Combine chemistry, fish count & macro count data
 #Create initial data frame from varous pieces
@@ -269,7 +266,7 @@ temp <- merge(chem,
 temp$StationID <- rep(Station[1], times = nrow(temp))
 
 #Create initial data frame
-data <- temp
+allData <- temp
 rm(temp)
 
 #Combine rest of the data frames
@@ -296,27 +293,25 @@ for(station in Station[2:length(Station)]) {
 
   #Add station's data to the full data set
   ifelse(nrow(temp) > 0, 
-    (data[(nrow(data)+1):(nrow(data) + nrow(temp)),] <- temp[1:nrow(temp),]),
-    data <- data)
+    (allData[(nrow(allData)+1):(nrow(allData) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    allData <- allData)
 }
 
 #rename data frame
-data$StationID.x <- NULL
-data$StationID.y <- NULL
+allData$StationID.x <- NULL
+allData$StationID.y <- NULL
 
-fishMacroChem <- data
-rm(chem, data, fish, macro, temp)
+rm(chem, fish, macro, temp)
 
 
 ##Add attributes
-fishMacroChemAttr <- merge(attributes,
-                           fishMacroChem,
-                           by = "StationID",
-                           all.y = TRUE)
-
+allData <- merge(allData,
+                 attributes,
+                 by = "StationID",
+                 all = TRUE)
 
 #Prep Micro data
-Station <- as.integer(sort(unique(fishMacroChemAttr$StationID)))
+Station <- as.integer(sort(unique(allData$StationID)))
 dup <- micro2
 StationID <- rep(Station[1], times = nrow(dup))
 micro2 <- cbind(dup, StationID)
@@ -328,19 +323,16 @@ for (station in Station[2:length(Station)]){
   rm(temp)
 }
 
-rm(dup)
+##Remove unneed variables
+rm(dup, Station, station, StationID)
 
 ##Combine micro df with fish & macro counts df
-allData <- merge(micro2,
-                 fishMacroChemAttr,
+allData <- merge(allData,
+                 micro2,
                  by = c("DateTime", "StationID"),
                  all = TRUE)
 
 summary(allData)
-
-
-##Remove unneed variables
-rm(Station)
 ```
 
 ###Variance within variables
