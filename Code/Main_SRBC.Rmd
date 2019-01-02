@@ -66,6 +66,7 @@ source("import_fish.R")
 fish <- import_fish()
 fishCounts <- fish[[1]]
 fishCounts2 <- fish[[2]]
+rm(fish)
 
 aggr(fishCounts2,
      col = c("navyblue", 
@@ -154,7 +155,8 @@ colnames(DateTime) <- "DateTime"
 
 
 
-###Average high frequency data
+###Average data over 4 hour period
+####Micro data
 Sridhar Ravula
 ```{r}
 hourseq = seq.POSIXt(startDate, endDate, by='4 hour')
@@ -169,8 +171,14 @@ microt$DateTime <- as.POSIXct(microt$DateTime,
 micro2 <- merge(DateTime, 
                   microt, 
                   by = "DateTime")
-rm(microt)
+rm(microt, micro)
 
+summary(micro2)
+```
+
+####Chemistry data
+Sridhar Ravula
+```{r}
 chemistry2t<- chemistry2 %>%
    group_by(StationID, StationName,DateTime = cut(DateTime, breaks=hourseq)) %>%
    summarise_all(mean)  %>% drop_na(DateTime)
@@ -181,8 +189,61 @@ chemistry3 <- merge(DateTime,
                     chemistry2t,
                     by = "DateTime")
 
-rm(hourseq,chemistry2t, DateTime, micro, chemistry2)
+rm(chemistry2t, chemistry2)
+
+summary(chemistry3)
 ```
+Remove variables with NAs only
+```{r}
+chemistry3$`BOD5 (mg/l)` <- NULL
+chemistry3$`Copper (ug/l)` <- NULL
+chemistry3$`Fecal Coliform (#/100ml)` <- NULL
+chemistry3$`Fluoride (mg/l)` <- NULL
+chemistry3$`Kjeld Nitrogen (mg/l)` <- NULL
+chemistry3$`Lead (ug/l)` <- NULL
+chemistry3$`Nickel (ug/l)` <- NULL
+chemistry3$`Residue (mg/l)` <- NULL
+chemistry3$`Zinc (ug/l)` <- NULL
+```
+####Fish Counts
+Emily Wefelmeyer
+```{r}
+temp <- fishCounts2 %>%
+   group_by(StationID, Site.Name, 
+            DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+temp$DateTime <- as.POSIXct(temp$DateTime, 
+                             format = "%Y-%m-%d %H:%M")
+fishCounts2 <- merge(DateTime,
+                    temp,
+                    by = "DateTime")
+rm(temp)
+
+summary(fishCounts2)
+```
+
+####Macro Counts
+Emily Wefelmeyer
+```{r}
+temp <- macroCounts2 %>%
+   group_by(Station_ID, Station.Name,
+            DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+temp$DateTime <- as.POSIXct(temp$DateTime, 
+                             format = "%Y-%m-%d %H:%M")
+macroCounts2 <- merge(DateTime,
+                    temp,
+                    by = "DateTime")
+
+rm(temp, hourseq)
+
+summary(macroCounts2[,1:100])
+summary(macroCounts2[,101:length(macroCounts2)])
+```
+
+
 
 #Check missing data
 Emily Wefelmeyer
@@ -197,8 +258,6 @@ aggr(chemistry3,
      gap = 3, 
      ylab = c("Missing Data", "Pattern"), 
      main = "Chemistry")
-
-(list_na <- colnames(chemistry3)[ apply(chemistry3, 2, anyNA)])
 
 chemistry3$CountNA <- apply(chemistry3, MARGIN = 1, function(x) sum(is.na(x)))
 chemistry3 <- chemistry3[!(chemistry3$CountNA == 52), ]
@@ -217,13 +276,9 @@ aggr(micro2,
      ylab = c("Missing Data", "Pattern"), 
      main = "Micro")
 
-(list_na <- colnames(micro2)[ apply(micro2, 2, anyNA)])
-
 micro2$CountNA <- apply(micro2, MARGIN = 1, function(x) sum(is.na(x)))
 micro2 <- micro2[!(micro2$CountNA == 5), ]
 micro2$CountNA <- NULL
-
-rm(list_na)
 ```
 
 ####Rename StationIDs for consistency
@@ -328,10 +383,37 @@ rm(dup, Station, station, StationID)
 allData <- merge(allData,
                  micro2,
                  by = c("DateTime", "StationID"),
-                 all = TRUE)
+                 all.x = TRUE)
 
-summary(allData)
+hold <- allData
+
+allData$CountNA <- apply(allData, MARGIN = 1, function(x) sum(is.na(x)))
 ```
+
+```{r}
+summary(allData[,1:85])
+```
+
+```{r}
+summary(allData[,86:171])
+```
+
+```{r}
+summary(allData[,172:257])
+```
+
+```{r}
+summary(allData[,258:343])
+```
+
+```{r}
+summary(allData[,344:length(allData)])
+```
+```{r}
+allData$CountNA <- NULL
+```
+All of the rows and columns have something in them.
+
 
 ###Variance within variables
 Igor Pilja
