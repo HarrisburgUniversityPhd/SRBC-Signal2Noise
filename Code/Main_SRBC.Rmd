@@ -360,34 +360,13 @@ rm(chem, fish, macro, temp)
 ##Add attributes
 allData <- merge(allData,
                  attributes,
-                 by = "StationID",
-                 all = TRUE)
-
-#Prep Micro data
-Station <- as.integer(sort(unique(allData$StationID)))
-dup <- micro2
-StationID <- rep(Station[1], times = nrow(dup))
-micro2 <- cbind(dup, StationID)
-
-for (station in Station[2:length(Station)]){
-  StationID <- rep(station, times = nrow(dup))
-  temp <- cbind(dup, StationID)
-  micro2 <- rbind(micro2, temp)
-  rm(temp)
-}
-
-##Remove unneed variables
-rm(dup, Station, station, StationID)
+                 by = "StationID")
 
 ##Combine micro df with fish & macro counts df
 allData <- merge(allData,
                  micro2,
-                 by = c("DateTime", "StationID"),
+                 by = c("DateTime"),
                  all.x = TRUE)
-
-hold <- allData
-
-allData$CountNA <- apply(allData, MARGIN = 1, function(x) sum(is.na(x)))
 ```
 
 ```{r}
