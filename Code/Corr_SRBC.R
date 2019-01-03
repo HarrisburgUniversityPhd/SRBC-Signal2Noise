@@ -17,8 +17,8 @@ Corr_SRBC <- function(allData) {
   
   # remove some of the variables such as Station ID, Alias Name, Latitude, etc.
   allData1$DateTime <- NULL
-  allData1[,ID_name[c(1:3,10:12)]] <- list(NULL)
-  allData1[,c(1:3)] <- NULL # remove station ID, "Station.ID", "Latitude", "Longitude"  
+  allData1[,ID_name[c(1:6)]] <- list(NULL)
+  allData1[,c(1,325,326)] <- NULL # remove station ID, "Station.ID", "Latitude", "Longitude"  
   
   str(allData1)
   #colnames(allData1)
@@ -27,7 +27,7 @@ Corr_SRBC <- function(allData) {
   allData1 <- sapply(allData1, as.numeric)
   
   # remove count data for fish and macro
-  allData2 <- allData1[,-c(147:201,207:426)]
+  allData2 <- allData1[,-c(44:98,104:323)]
   
   # calculate correlation matrix and significance levels
   corre_ent2 <- rcorr(as.matrix(allData2))
