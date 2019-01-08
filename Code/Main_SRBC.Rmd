@@ -13,8 +13,7 @@ Framework created by Pranita Patil.
 ##Load libraries
 Emily Wefelmeyer
 ```{r}
-if (!require('RCurl')) install.packages('RCurl', quiet=TRUE)
-require(Rcurl)
+require(RCurl)
 
 if (!require('dplyr')) install.packages('dplyr', quiet=TRUE)
 library(dplyr)
@@ -135,6 +134,7 @@ Emily Wefelmeyer
 ```{r}
 source("Metrics_fish.R")
 fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
+rm(fishCounts)
 ```
 
 ####Fix TimeDate stamps
@@ -246,8 +246,6 @@ summary(macroCounts2[,101:length(macroCounts2)])
 
 rm(DateTime)
 ```
-
-
 
 #Check missing data
 Emily Wefelmeyer
@@ -372,7 +370,7 @@ allData <- merge(allData,
                  by = c("DateTime"),
                  all.x = TRUE)
 
-rm(attributes, chemistry3, fishCounts, fishCounts2, macroCounts2, micro2)
+rm(attributes, chemistry3, macroCounts2, micro2)
 ```
 
 ```{r}
@@ -394,6 +392,7 @@ summary(allData[,258:343])
 ```{r}
 summary(allData[,344:length(allData)])
 ```
+
 ```{r}
 allData$CountNA <- NULL
 ```
@@ -617,7 +616,7 @@ for (i in seq(1, 142, by=29))
 # dev.off()
 
 
-rm(rpvalue, rcoeff, allData3, rpvalue1, rcoeff1, rpvalue2, rcoeff2, upper_tri_p, corre_ent3, cor_coef3, cor_p3, cor_coef2, corr_results, cor_p2, ggheatmap2, melted_cormat, melted_cormat_p, melted_cormat_stars, i, j, upper_tri)
+rm(rpvalue, rcoeff, allData3, rpvalue1, rcoeff1, rpvalue2, rcoeff2, upper_tri_p, corre_ent3, cor_coef3, cor_p3, cor_coef2, corr_results, cor_p2, ggheatmap2, melted_cormat, melted_cormat_p, melted_cormat_stars, i, j, upper_tri, k)
 ```
 
 ### Calculate PCA
