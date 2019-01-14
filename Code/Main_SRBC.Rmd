@@ -62,10 +62,7 @@ chemistry2 <- import_chemistry()
 Emily Wefelmeyer
 ```{r}
 source("import_fish.R")
-fish <- import_fish()
-fishCounts <- fish[[1]]
-fishCounts2 <- fish[[2]]
-rm(fish)
+fishCounts2 <- import_fish()
 
 aggr(fishCounts2,
      col = c("navyblue", 
@@ -81,6 +78,15 @@ aggr(fishCounts2,
 (list_na <- colnames(fishCounts2)[ apply(fishCounts2, 2, anyNA)])
 ```
 No missing data
+
+
+### Calculate fish metrics
+Emily Wefelmeyer
+```{r}
+source("Metrics_fish.R")
+fishCounts2 <- Metrics_fish(fishCounts2)
+```
+
 
 ###Macro Counts
 Emily Wefelmeyer
@@ -100,6 +106,15 @@ aggr(macroCounts2,
      main = "MacroCounts")
 ```
 No missing data
+
+### Calculate macro metrics
+Emily Wefelmeyer
+```{r}
+source("Metrics_macro.R")
+macroCounts2 <- Metrics_macro(macroCounts2)
+```
+
+
 
 ###Attribute data for each site
 ###Water Quality Measures for entire system
@@ -129,13 +144,7 @@ rm(list_na)
 ```
 Missing data not causing issue
 
-### Calculate fish metrics
-Emily Wefelmeyer
-```{r}
-source("Metrics_fish.R")
-fishCounts2 <- Metrics_fish(fishCounts, fishCounts2)
-rm(fishCounts)
-```
+
 
 ####Fix TimeDate stamps
 Subset dataframes by DTS
@@ -211,7 +220,7 @@ chemistry3$`Zinc (ug/l)` <- NULL
 Emily Wefelmeyer
 ```{r}
 temp <- fishCounts2 %>%
-   group_by(StationID, Site.Name, 
+   group_by(Station_ID, Site.Name, 
             DateTime = cut(DateTime, breaks=hourseq)) %>%
    summarise_all(mean)  %>% drop_na(DateTime)
 
@@ -287,6 +296,9 @@ micro2$CountNA <- NULL
 Emily Wefelmeyer
 ```{r}
 #Rename StationID#s for consistency
+fishCounts2$StationID <- fishCounts2$Station_ID
+fishCounts2$Station_ID <- NULL
+
 macroCounts2$StationID <- macroCounts2$Station_ID
 macroCounts2$Station_ID <- NULL
 
@@ -355,6 +367,7 @@ for(station in Station[2:length(Station)]) {
 #rename data frame
 allData$StationID.x <- NULL
 allData$StationID.y <- NULL
+
 
 rm(chem, fish, macro, temp, station, Station)
 
@@ -472,6 +485,18 @@ colnames(newList1) <- c("Variable",
   plot(allData$Turbidity)
   plot(allData$pH, allData$DateTime)
   plot(allData$pH)
+  
+  plot(allData$pielou, allData$DateTime,xlab="Pielou",ylab="Date and Time")
+  plot(allData$pielou,ylab="Pielou")
+  plot(allData$speciesCount,allData$DateTime,xlab="Species Count",ylab="Date and Time")
+  plot(allData$speciesCount,ylab="Species Count")
+  plot(allData$Hills_N1,allData$DateTime,xlab="Hills N1",ylab="Date and Time")
+  plot(allData$Hills_N1,ylab="Hills N1")
+  plot(allData$Hills_N2,allData$DateTime,xlab="Hills N2",ylab="Date and Time")
+  plot(allData$Hills_N2,ylab="Hills N2")
+  plot(allData$margalef,allData$DateTime,xlab="Margalef",ylab="Date and Time")
+  plot(allData$margalef,ylab="Margalef")
+
 rm(newList1, lstToDf, nlst)
 ```
 

@@ -40,7 +40,6 @@ import_macro <- function() {
   
   summary(macroCounts2)
   
-  rm(macroCounts)
   
   return(macroCounts2)
 }

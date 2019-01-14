@@ -58,6 +58,6 @@ import_fish <- function() {
   
   summary(fishCounts2)
   
-  return(list(fishCounts,fishCounts2))
+  return(fishCounts2)
   
 }
