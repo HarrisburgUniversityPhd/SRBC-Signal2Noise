@@ -1,6 +1,6 @@
 ---
 title: "Main_SRBC"
-author: "Pranita Patil, Emily Wefelmeyer, Sridhar Ravula, Igor Pilja"
+author: "Pranita Patil, Emily Wefelmeyer, Sridhar Ravula, Igor Pilja, Ziyuan Huang"
 date: "November 27, 2018"
 output: pdf_document
 ---
@@ -499,6 +499,768 @@ colnames(newList1) <- c("Variable",
 
 rm(newList1, lstToDf, nlst)
 ```
+
+#Site Variablility
+Ziyuan Huang
+```{r load_package}
+suppressMessages(library(readr))
+suppressMessages(library(Rfast))
+# suppressMessages(library(tibble))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(BBmisc))
+suppressMessages(library(reshape2))
+suppressMessages(library(dplyr))
+# write.csv(allData,file = "data/allData.csv")
+# write.csv(fishCounts2,file = "data/fishCounts2.csv")
+# write.csv(chemistry3,file = "data/chemistry3.csv")
+# O2Dis pH SpCond Turbidity WaterTemp
+# allData <- suppressMessages(read_csv(file = "data/allData.csv"))
+# allData <- allData[,-1]
+# fishCounts2 <- suppressMessages(read_csv(file = "data/fishCounts2.csv"))
+# fishCounts2 <- fishCounts2[,-1]
+# chemistry3 <- suppressMessages(read_csv(file = "data/chemistry3.csv"))
+# chemistry3 <- chemistry3[,-1]
+```
+
+```{r variability_load_packages}
+srbc.Data <- allData #suppressMessages(read_csv("allData.csv"))
+class(srbc.Data)
+```
+
+```
+Reference https://newonlinecourses.science.psu.edu/stat500/node/13/
+
+Measures of Variability
+
+  1. Range
+  2. Interquartile Range (IQR)
+  3. Variance
+  4. Standard Deviation
+
+```
+
+```
+I figured using measures of variability makes sense in our case to analyze the variability of water quality across Pine Creek stations. In this case, we could have a high level view of how do the data points differ between different Pine Creek stations.
+```
+
+```{r variability_get_num_data}
+norm_0_1 <- function(x){(x-min(x))/(max(x)-min(x))}
+numeric.variables <- unlist(lapply(srbc.Data, is.numeric))  
+srbc.num.Data <- (srbc.Data[ , numeric.variables])
+# variability_preprocess_data
+for(i in 1:ncol(srbc.num.Data)){
+  srbc.num.Data[is.na(srbc.num.Data[,i]), i] <- mean(srbc.num.Data[,i], na.rm = TRUE)
+  srbc.num.Data[is.nan(srbc.num.Data[,i]), i] <- 0
+  srbc.num.Data[,i] <- norm_0_1(srbc.num.Data[,i])
+}
+srbc.num.Data$StationID <- factor(allData$StationID)
+srbc.num.Data$StationName <- factor(allData$StationName)
+```
+
+```{r variability_ph}
+site_variability_dt <- data.frame(StationID = srbc.num.Data$StationID,
+                                  # StationName = srbc.num.Data$StationName,
+                                  Latitude = srbc.num.Data$Latitude,
+                                  Longitude = srbc.num.Data$Longitude,
+                                  pH = srbc.num.Data$pH
+                                  )
+
+data <- site_variability_dt
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude)
+calculated <- summarise(grouped, mean=mean(value), sd=sd(value), var = var(value), range = max(value)-min(value), iqr = IQR(value))
+
+for(i in 4:ncol(calculated)){
+  calculated[is.na(calculated[,i]), i] <- mean(data.matrix(calculated[,i]), na.rm = TRUE)
+  calculated[,i] <- norm_0_1(calculated[,i])
+}
+
+calculated
+```
+
+```{r variability_df}
+var_norm_df <- data.frame(
+  StationID = srbc.num.Data$StationID,
+  Latitude = srbc.num.Data$Latitude,
+  Longitude = srbc.num.Data$Longitude,
+  pH = (srbc.num.Data$pH),
+  O2Dis = (srbc.num.Data$O2Dis),
+  SpCond = (srbc.num.Data$SpCond),
+  Turbidity = (srbc.num.Data$Turbidity),
+  WaterTemp = (srbc.num.Data$WaterTemp)
+)
+
+data <- var_norm_df
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude, variable)
+
+var_norm_calculated <- summarise(grouped, 
+                        Mean=mean(value), 
+                        SD=sd(value), 
+                        Variance = var(value), 
+                        Range = max(value)-min(value), 
+                        IQR = IQR(value),
+                        Max = max(value),
+                        Min = min(value))
+
+# Replace NA with column mean
+for(i in 5:ncol(var_norm_calculated)){
+  var_norm_calculated[is.na(var_norm_calculated[,i]), i] <- mean(data.matrix(var_norm_calculated[,i]), na.rm = TRUE)
+  var_norm_calculated[,i] <- norm_0_1(var_norm_calculated[,i])
+}
+
+colnames(var_norm_calculated)[4] <- c("Variable")
+
+var_norm_calculated
+```
+
+```
+IQR and Boxplot
+```
+
+```{r variability_iqr_box}
+point_size = 0.5
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, pH, FUN = median), y=pH, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized pH") +
+      xlab("Station Ordered by pH Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, O2Dis, FUN = median), y=O2Dis, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized O2Dis") +
+      xlab("Station Ordered by O2Dis Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, SpCond, FUN = median), y=SpCond, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized SpCond") +
+      xlab("Station Ordered by SpCond Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Turbidity, FUN = median), y=Turbidity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Turbidity") +
+      xlab("Station Ordered by Turbidity Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p5 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, WaterTemp, FUN = median), y=WaterTemp, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Water Tempreature") +
+      xlab("Station Ordered by Water Tempreature Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+p5
+```
+
+```
+Range and Plot
+```
+
+```{r variability_range}
+pr <- ggplot(var_norm_calculated, aes(x=reorder(StationID, Range)))+
+        geom_linerange(aes(ymin=Min,ymax=Max),linetype=1,color="blue")+
+        geom_point(aes(y=Min),size=1,color="red")+
+        geom_point(aes(y=Max),size=1,color="red")+
+        ylab("Normalized Range") +
+        xlab("Range Across All Pine Creek Stations All Years Order by Range") +
+        facet_grid(rows = vars(Variable)) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8))
+pr
+```
+
+```{r variability_variance}
+pv <- ggplot(data=var_norm_calculated, aes(x=reorder(StationID, Variance), y=Variance, color=Variable, group=1)) +
+        geom_line()+
+        facet_grid(rows = vars(Variable)) +
+        geom_point() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8),
+              legend.position = "none") +
+        ylab("Normalized Variance") +
+        xlab("Variance Across All Pine Creek Stations All Years Order by Variance")
+pv
+```
+
+```{r variability_sd}
+ps <- ggplot(data=var_norm_calculated, aes(x=reorder(StationID, SD), y=SD, color=Variable, group=1)) +
+        geom_line()+
+        facet_grid(rows = vars(Variable)) +
+        geom_point() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8),
+              legend.position = "none") +
+        ylab("Normalized Standard Deviation") +
+        xlab("Standard Deviation Across All Pine Creek Stations All Years")
+ps
+```
+
+
+```{r}
+# Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+#  contrasts can be applied only to factors with 2 or more levels
+options( scipen = 0 )
+options( digits = 6 )
+nan_cols <- sapply(srbc.num.Data, function(x) all(is.nan(x)))
+srbc.num.Data <- srbc.num.Data[,!nan_cols]
+na_cols <- sapply(srbc.num.Data, function(x) all(is.na(x)))
+srbc.num.Data <- srbc.num.Data[,!na_cols]
+suppressMessages(attach(srbc.num.Data))
+StationID <- factor(StationID)
+
+column_names <- c()
+flag <- TRUE
+
+for (i in names(srbc.num.Data)) {
+  if (flag == TRUE && i != "StationID") {
+    column_names <- c(column_names,paste0("`",i,"`"))
+    flag <- FALSE
+  } else if (i != "StationID" && i != "StationName" && i != "Latitude" && i != "Longitude") {
+    column_names <- c(column_names,paste0(", `",i,"`"))
+  }
+}
+
+combine_Y <- paste0("Y <- cbind(",paste0(column_names, sep="", collapse=""),")")
+eval(parse(text = combine_Y))
+
+fit <- manova(Y ~ StationID)
+
+sum.fit.wilks <- summary(fit, intercept = TRUE, tol=0, test = "Wilks")
+
+sum.aov <- summary.aov(fit)
+
+```
+
+```{r}
+# options( scipen=999 )
+options( scipen = 0 )
+options( digits = 6 )
+PrF_Table <- c(Variable = c(), PrF = c())
+
+for (i in names(srbc.num.Data)) {
+  if (i != "StationID" && i != "StationName" && i != "Latitude" && i != "Longitude") {
+    qry_sum_Name <- paste0("Variable <- '",i,"'")
+    qry_sum_PrF <- paste0("PrF <- sum.aov$` Response ",i,"`[,5][1]")
+    # print(qry_sum_Name)
+    eval(parse(text = qry_sum_Name))
+    PrF_Table$Variable <- append(PrF_Table$Variable, Variable)
+    
+    #print(qry_sum_PrF)
+    eval(parse(text = qry_sum_PrF))
+    PrF_Table$PrF <- append(PrF_Table$PrF, PrF)
+    
+  }
+}
+
+PrF_Table <- data.frame(PrF_Table)
+PrF_Table$PrF <- round(PrF_Table$PrF,30)
+PrF_Table
+```
+
+```{r}
+PrF_Table_Sig <- subset(PrF_Table,PrF_Table$PrF <= 0.05)
+PrF_Table_Sig
+```
+
+```{r}
+PrF_Table_Sig[order(PrF_Table_Sig$Variable),]
+```
+
+```{r variability_new}
+var_norm_df <- data.frame(
+  StationID = srbc.num.Data$StationID,
+  Latitude = srbc.num.Data$Latitude,
+  Longitude = srbc.num.Data$Longitude,
+  
+  # pick up 3 chemistry elements for data viz
+  Barium = (srbc.num.Data$`Barium (ug/l)`),
+  Iron = (srbc.num.Data$`Iron (ug/l)`),
+  Magnesium = (srbc.num.Data$`Magnesium (mg/l)`),
+  
+  # pick up 3 PA native fishes for data viz
+  Bluegill = (srbc.num.Data$bluegill),
+  Rock_Bass = (srbc.num.Data$rock_bass),
+  Largemouth_Bass = (srbc.num.Data$largemouth_bass),
+  
+  # pick up species count and disersity indexes for data viz
+  SpeciesCount = (srbc.num.Data$speciesCount),  
+  Pielou = (srbc.num.Data$pielou),
+  Hills_N1 = (srbc.num.Data$Hills_N1),
+  Hills_N2 = (srbc.num.Data$Hills_N2),
+  
+  # pick up a few Benthic macroinvertebrates (BMI) for data viz
+  Acentrella = srbc.num.Data$acentrella,
+  Baetis = srbc.num.Data$baetis,
+  Chimarra = srbc.num.Data$chimarra,
+  Dytiscidae = srbc.num.Data$dytiscidae,
+  
+  # pick up a plant underwater for data viz
+  Limnophila = srbc.num.Data$limnophila,
+  
+  # stream order
+  Stream_Order = srbc.num.Data$StreamOrder,
+  Stream_Density = srbc.num.Data$StreamDensity,
+  
+  # raining
+  Annual_Precip = srbc.num.Data$Annual.Precip,
+  Mar_Precip = srbc.num.Data$Mar.Precip,
+  Jun_Precip = srbc.num.Data$Jun.Precip,
+  Sep_Precip = srbc.num.Data$Sep.Precip,
+  Dec_Precip = srbc.num.Data$Dec.Precip,
+  
+  # type of land
+  MixForest = srbc.num.Data$`MixForest..`,
+  Shrub = srbc.num.Data$`Shrub..`,
+  Wetland = srbc.num.Data$`Wetland..`,
+
+  # about the water
+  Water_Capacity = srbc.num.Data$Available.Water.Capacity,
+  Percent_Clay = srbc.num.Data$Percent.Clay,
+  Permeability = srbc.num.Data$Permeability,
+  Thickness = srbc.num.Data$Thickness
+
+)
+
+data <- var_norm_df
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude, variable)
+
+var_norm_calculated <- summarise(grouped, 
+                        Mean=mean(value), 
+                        SD=sd(value), 
+                        Variance = var(value), 
+                        Range = max(value)-min(value), 
+                        IQR = IQR(value),
+                        Max = max(value),
+                        Min = min(value))
+
+# Replace NA with column mean
+for(i in 5:ncol(var_norm_calculated)){
+  var_norm_calculated[is.na(var_norm_calculated[,i]), i] <- mean(data.matrix(var_norm_calculated[,i]), na.rm = TRUE)
+  var_norm_calculated[,i] <- norm_0_1(var_norm_calculated[,i])
+}
+
+colnames(var_norm_calculated)[4] <- c("Variable")
+
+var_norm_calculated
+```
+
+```{r chemistry_elements}
+  # pick up 3 chemistry elements for data viz
+  # Barium = (srbc.num.Data$`Barium (ug/l)`),
+  # Iron = (srbc.num.Data$`Iron (ug/l)`),
+  # Magnesium = (srbc.num.Data$`Magnesium (mg/l)`),
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Barium (ug/l)`, FUN = median), y=`Barium (ug/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Barium (ug/l)") +
+      xlab("Station Ordered by Barium Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Iron (ug/l)`, FUN = median), y=`Iron (ug/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Iron (ug/l)") +
+      xlab("Station Ordered by Iron Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Magnesium (mg/l)`, FUN = median), y=`Magnesium (mg/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Magnesium (mg/l)") +
+      xlab("Station Ordered by Magnesium Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # pick up 3 PA native fishes for data viz
+  # Bluegill = (srbc.num.Data$bluegill),
+  # Rock_Bass = (srbc.num.Data$rock_bass),
+  # Largemouth_Bass = (srbc.num.Data$largemouth_bass),
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, bluegill, FUN = median), y=bluegill, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Bluegill Count") +
+      xlab("Station Ordered by Bluegill Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, rock_bass, FUN = median), y=rock_bass, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Rock Bass Count") +
+      xlab("Station Ordered by Rock Bass Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, largemouth_bass, FUN = median), y=largemouth_bass, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Largemouth Bass Count") +
+      xlab("Station Ordered by Largemouth Bass Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # pick up species count and disersity indexes for data viz
+  # SpeciesCount = (srbc.num.Data$speciesCount),  
+  # Pielou = (srbc.num.Data$pielou),
+  # Hills_N1 = (srbc.num.Data$Hills_N1),
+  # Hills_N2 = (srbc.num.Data$Hills_N2),
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, speciesCount, FUN = median), y=speciesCount, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Species Count") +
+      xlab("Station Ordered by Species Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, pielou, FUN = median), y=pielou, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Pielou Index") +
+      xlab("Station Ordered by Pielou Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Hills_N1, FUN = median), y=Hills_N1, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Hill's N1 Index") +
+      xlab("Station Ordered by Hill's N1 Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Hills_N2, FUN = median), y=Hills_N2, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Hill's N2 Index") +
+      xlab("Station Ordered by Hill's N2 Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+```{r}
+  # pick up a few Benthic macroinvertebrates (BMI) for data viz
+  # Acentrella = srbc.num.Data$acentrella,
+  # Baetis = srbc.num.Data$baetis,
+  # Chimarra = srbc.num.Data$chimarra,
+  # Dytiscidae = srbc.num.Data$dytiscidae,
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, acentrella, FUN = median), y=acentrella, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Acentrella Count") +
+      xlab("Station Ordered by Acentrella Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, baetis, FUN = median), y=baetis, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Baetis Count") +
+      xlab("Station Ordered by Baetis Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, chimarra, FUN = median), y=chimarra, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Chimarra Count") +
+      xlab("Station Ordered by Chimarra Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, dytiscidae, FUN = median), y=dytiscidae, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Dytiscidae Count") +
+      xlab("Station Ordered by Dytiscidae Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+```{r}
+  # pick up a plant underwater for data viz
+  # Limnophila = srbc.num.Data$limnophila,
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, limnophila, FUN = median), y=limnophila, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Limnophila Count") +
+      xlab("Station Ordered by Limnophila Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+
+```
+
+```{r}
+  # stream order
+  # Stream_Order = srbc.num.Data$StreamOrder,
+  # Stream_Density = srbc.num.Data$StreamDensity,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, StreamOrder, FUN = median), y=StreamOrder, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Stream Order") +
+      xlab("Station Ordered by Stream Order Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, StreamDensity, FUN = median), y=StreamDensity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Stream Density") +
+      xlab("Station Ordered by Stream Density Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+```
+
+```{r}  
+  # raining
+  # Annual_Precip = srbc.num.Data$Annual.Precip,
+  # Mar_Precip = srbc.num.Data$Mar.Precip,
+  # Jun_Precip = srbc.num.Data$Jun.Precip,
+  # Sep_Precip = srbc.num.Data$Sep.Precip,
+  # Dec_Precip = srbc.num.Data$Dec.Precip,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Annual.Precip, FUN = median), y=Annual.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Annual Precip") +
+      xlab("Station Ordered by Annual Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Mar.Precip, FUN = median), y=Mar.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Mar Precip") +
+      xlab("Station Ordered by Mar Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Jun.Precip, FUN = median), y=Jun.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Jun Precip") +
+      xlab("Station Ordered by Jun Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Sep.Precip, FUN = median), y=Sep.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Sep Precip") +
+      xlab("Station Ordered by Sep Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p5 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Dec.Precip, FUN = median), y=Dec.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Dec Precip") +
+      xlab("Station Ordered by Dec Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+p5
+```
+
+```{r}
+  # type of land
+  # MixForest = srbc.num.Data$`MixForest..`,
+  # Shrub = srbc.num.Data$`Shrub..`,
+  # Wetland = srbc.num.Data$`Wetland..`,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `MixForest..`, FUN = median), y=`MixForest..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Mix Forest") +
+      xlab("Station Ordered by Mix Forest Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Shrub..`, FUN = median), y=`Shrub..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Shrub") +
+      xlab("Station Ordered by Shrub Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Wetland..`, FUN = median), y=`Wetland..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Wetland") +
+      xlab("Station Ordered by Wetland Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # about the water
+  # Water_Capacity = srbc.num.Data$Available.Water.Capacity,
+  # Percent_Clay = srbc.num.Data$Percent.Clay,
+  # Permeability = srbc.num.Data$Permeability,
+  # Thickness = srbc.num.Data$Thickness
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Available.Water.Capacity, FUN = median), y=Available.Water.Capacity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Available Water Capacity") +
+      xlab("Station Ordered by Available Water Capacity Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Percent.Clay, FUN = median), y=Percent.Clay, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Percent Clay") +
+      xlab("Station Ordered by Percent Clay Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Permeability, FUN = median), y=Permeability, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Permeability") +
+      xlab("Station Ordered by Permeability Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Thickness, FUN = median), y=Thickness, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Thickness") +
+      xlab("Station Ordered by Thickness Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+```{r}
+getwd()
+```
+
+#Diversity by Regions
+Sridhar Ravula
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+if (!require('ggthemes')) install.packages('ggthemes', quiet=TRUE)
+library(ggthemes)
+if (!require('scales')) install.packages('scales', quiet=TRUE)
+library(scales)
+
+#library(ggmap)
+
+
+##Geerate Temp datatframe----
+allDatat<- allData%>% drop_na(pielou)
+#allDatat<- my_data%>% drop_na(pielou)
+
+allDatat <- allDatat[,c("StationID","StreamOrder","DateTime","Longitude", "Latitude","pielou","Hills_N1", "Hills_N2")]
+allDatat$Long2 <- round(allDatat$Longitude,1)
+allDatat$Lat2 <- round(allDatat$Latitude,1)
+allDatat$LongLat2 <- paste(allDatat$Lat2,"-",allDatat$Long2)
+
+#saveRDS(allDatat, "allDatat_01142019.rds")
+#table(allDatat$LongLat2)
+
+
+DiversityP <- ggplot(allDatat, aes(DateTime, pielou)) +
+  geom_point() +
+  xlab("Date") + ylab("Diversity ") +
+  #scale_x_date(labels=date_format ("%m-%y"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold",
+                                  size = 20)) +
+  theme(text = element_text(size=18))
+
+#DiversityP
+
+DiversityP + facet_grid(LongLat2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Lat-Long") 
+DiversityP + facet_grid(Long2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Long")
+DiversityP + facet_grid(Lat2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Lat") 
+DiversityP + facet_grid(StreamOrder ~ . )+
+  ggtitle("Pielou Diversity by StreamOrder") 
+
+
+
+
+DiversityH1 <- ggplot(allDatat, aes(DateTime, Hills_N1)) +
+  geom_point() +
+  xlab("Date") + ylab("Diversity ") +
+  #scale_x_date(labels=date_format ("%m-%y"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold",
+                                  size = 20)) +
+  theme(text = element_text(size=18))
+
+DiversityH1 + facet_grid(LongLat2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Lat-Long") 
+DiversityH1 + facet_grid(Long2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Long")
+DiversityH1 + facet_grid(Lat2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Lat") 
+DiversityH1 + facet_grid(StreamOrder ~ . )+
+  ggtitle("Hills_N1 Diversity by StreamOrder") 
+```
+
+
 
 ### Calculate Correlaton between FishCount and Fish metrics
 Pranita Patil
