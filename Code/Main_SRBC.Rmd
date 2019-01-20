@@ -382,8 +382,6 @@ allData <- merge(allData,
                  micro2,
                  by = c("DateTime"),
                  all.x = TRUE)
-
-rm(attributes, chemistry3, macroCounts2, micro2)
 ```
 
 ```{r}
@@ -511,16 +509,6 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(BBmisc))
 suppressMessages(library(reshape2))
 suppressMessages(library(dplyr))
-# write.csv(allData,file = "data/allData.csv")
-# write.csv(fishCounts2,file = "data/fishCounts2.csv")
-# write.csv(chemistry3,file = "data/chemistry3.csv")
-# O2Dis pH SpCond Turbidity WaterTemp
-# allData <- suppressMessages(read_csv(file = "data/allData.csv"))
-# allData <- allData[,-1]
-# fishCounts2 <- suppressMessages(read_csv(file = "data/fishCounts2.csv"))
-# fishCounts2 <- fishCounts2[,-1]
-# chemistry3 <- suppressMessages(read_csv(file = "data/chemistry3.csv"))
-# chemistry3 <- chemistry3[,-1]
 ```
 
 ```{r variability_load_packages}
@@ -1189,10 +1177,6 @@ p3
 p4
 ```
 
-```{r}
-getwd()
-```
-
 #Diversity by Regions
 Sridhar Ravula
 ```{r}
@@ -1319,7 +1303,6 @@ ggheatmap(rcoeff1, rpvalue1, 2)
 rcoeff2 <-(cor_coef3[31:60,31:60])
 rpvalue2 <- (cor_p3[31:60,31:60])
 ggheatmap(rcoeff2, rpvalue2, 3)
-
 ```
 
 ### Calculate correlations
@@ -1405,6 +1388,81 @@ for (i in seq(1, 142, by=29))
 
 rm(rpvalue, rcoeff, allData3, rpvalue1, rcoeff1, rpvalue2, rcoeff2, upper_tri_p, corre_ent3, cor_coef3, cor_p3, cor_coef2, corr_results, cor_p2, ggheatmap2, melted_cormat, melted_cormat_p, melted_cormat_stars, i, j, upper_tri, k)
 ```
+
+#Data frame for analysis
+### Combine all Data frames
+Emily Wefelmeyer
+```{r}
+Station = as.numeric(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
+
+###Combine chemistry, fish count & macro count data
+#Create initial data frame from varous pieces
+chem <- subset(chemistry3, StationID == Station[1])
+fish <- subset(fishCounts2, StationID == Station[1])
+macro <- subset(macroCounts2, StationID == Station[1])
+
+#Combine fish & macro counts
+temp <- merge(fish,
+              macro,
+              by = "DateTime",
+              all = TRUE)
+
+#Add in chemistry
+temp <- merge(chem,
+              temp,
+              by = "DateTime",
+              all = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(Station[1], times = nrow(temp))
+
+#Create initial data frame
+allData2 <- temp
+rm(temp)
+
+#Combine rest of the data frames
+for(station in Station[2:length(Station)]) {
+  chem <- subset(chemistry3, StationID == station)
+  fish <- subset(fishCounts2, StationID == station)
+  macro <- subset(macroCounts2, StationID == station)
+  
+  #Combine fish & macro counts
+  temp <- merge(fish,
+                macro,
+                by = "DateTime",
+                all = TRUE)
+  
+  
+  #Add chemistry data
+  temp <- merge(chem,
+                temp,
+                by = "DateTime",
+                all = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+
+  #Add station's data to the full data set
+  ifelse(nrow(temp) > 0, 
+    (allData2[(nrow(allData2)+1):(nrow(allData2) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    allData2 <- allData2)
+}
+
+#rename data frame
+allData2$StationID.x <- NULL
+allData2$StationID.y <- NULL
+
+
+rm(chem, fish, macro, temp, station, Station)
+
+
+##Combine micro df with fish & macro counts df
+allData2 <- merge(allData2,
+                 micro2,
+                 by = c("DateTime"),
+                 all = TRUE)
+```
+
 
 ### Calculate PCA
 ```{r}
