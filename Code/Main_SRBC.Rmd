@@ -109,10 +109,10 @@ No missing data
 
 ### Calculate macro metrics
 Emily Wefelmeyer
-```{r}
+
 source("Metrics_macro.R")
 macroCounts2 <- Metrics_macro(macroCounts2)
-```
+
 
 
 
