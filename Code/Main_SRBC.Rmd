@@ -1461,8 +1461,86 @@ allData2 <- merge(allData2,
                  micro2,
                  by = c("DateTime"),
                  all.x = TRUE)
+
+n <- sapply(allData2, function(y) sum(length(which(is.na(y)))))
+
+drop_var <- list()
+c <- ceiling(.98 * nrow(allData2))
+
+#select variables with more than 98% of data missing
+for(i in 1:length(n)){
+  if (n[[i]] > c) drop_var[[length(drop_var)+1]] <- names(n)[[i]]
+}
+
+for(i in 1:length(drop_var)){
+  allData2[[drop_var[[i]]]] <- NULL
+}
+
 ```
 
+```{r}
+describe(allData2[,1:20])
+```
+
+```{r}
+describe(allData2[,21:40])
+```
+
+```{r}
+describe(allData2[,41:60])
+```
+
+```{r}
+describe(allData2[,61:80])
+```
+
+```{r}
+describe(allData2[,81:100])
+```
+
+```{r}
+describe(allData2[,101:120])
+```
+
+```{r}
+describe(allData2[,121:140])
+```
+
+```{r}
+describe(allData2[,141:160])
+```
+
+```{r}
+describe(allData2[,161:180])
+```
+
+```{r}
+describe(allData2[,181:200])
+```
+
+```{r}
+describe(allData2[,201:220])
+```
+
+```{r}
+describe(allData2[,221:240])
+```
+
+```{r}
+describe(allData2[,241:260])
+```
+
+```{r}
+describe(allData2[,261:280])
+```
+
+```{r}
+describe(allData2[,281:300])
+```
+
+```{r}
+describe(allData2[,301:ncol(allData2)])
+```
 
 ### Calculate PCA
 ```{r}
