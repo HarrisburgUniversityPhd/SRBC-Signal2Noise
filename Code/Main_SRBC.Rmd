@@ -1460,7 +1460,7 @@ rm(chem, fish, macro, temp, station, Station)
 allData2 <- merge(allData2,
                  micro2,
                  by = c("DateTime"),
-                 all = TRUE)
+                 all.x = TRUE)
 ```
 
 
