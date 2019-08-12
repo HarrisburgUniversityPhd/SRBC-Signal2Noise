@@ -41,7 +41,7 @@ import_attribute_micro <- function() {
   
   micro$DateTime <- as.POSIXct(paste(micro$Date, 
                                      micro$Time), 
-                               format = "%Y-%m-%d %H:%M")
+                               format = "%Y-%m-%d %H:%M", tz = "UTC")
   
   #Remove redundent variables
   micro$Date <- NULL

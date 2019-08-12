@@ -22,7 +22,7 @@ import_fish <- function() {
   fishCounts$Date <- as.Date(fishCounts$Date, format = "%m/%d/%Y")
   
   
-  fishCounts$DateTime <- as.POSIXct(paste(fishCounts$Date, fishCounts$Time), format = "%Y-%m-%d %H:%M")
+  fishCounts$DateTime <- as.POSIXct(paste(fishCounts$Date, fishCounts$Time), format = "%Y-%m-%d %H:%M", tz = "UTC")
   
   #Convert fish names to all lowercase to avoid duplicates & some other data cleanup.
   fishCounts$Fish <- tolower(fishCounts$Fish)

@@ -1,0 +1,1586 @@
+---
+title: "Main_SRBC"
+author: "Pranita Patil, Emily Wefelmeyer, Sridhar Ravula, Igor Pilja, Ziyuan Huang"
+date: "November 27, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Framework created by Pranita Patil.
+
+##Load libraries
+Emily Wefelmeyer
+```{r}
+require(RCurl)
+
+if (!require('dplyr')) install.packages('dplyr', quiet=TRUE)
+library(dplyr)
+
+if (!require('Hmisc')) install.packages('Hmisc', quiet=TRUE)
+library(Hmisc)
+
+if (!require("stringr")) install.packages("stringr", quiet = TRUE)
+library(stringr)
+
+if (!require("lubridate")) install.packages("lubridate", quiet = TRUE)
+library(lubridate)
+
+if (!require("rstudioapi")) install.packages("rstudioapi", quiet = TRUE)
+library(rstudioapi) 
+
+if (!require('mice')) install.packages('mice', quiet=TRUE)
+library(mice)
+
+if (!require('VIM')) install.packages('VIM', quiet=TRUE)
+library(VIM)
+```
+
+##Import Excel files from Git
+###Function
+Emily Wefelmeyer
+```{r}
+importGitHub <- function(url, skip){
+  df <- read.csv(text = getURL(url),
+                 skip = skip)
+  
+  return(df)
+}
+```
+
+###Chemistry Data 
+####Load chemistry data
+Emily Wefelmeyer
+```{r}
+source("import_chemistry.R")
+chemistry2 <- import_chemistry()
+```
+
+###Fish Data 
+####Load Fish data
+Emily Wefelmeyer
+```{r}
+source("import_fish.R")
+fishCounts <- import_fish()
+
+aggr(fishCounts,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(fishCounts), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "FishCounts")
+
+(list_na <- colnames(fishCounts)[ apply(fishCounts, 2, anyNA)])
+```
+No missing data
+
+
+### Calculate fish metrics
+Emily Wefelmeyer
+```{r}
+source("Metrics_fish.R")
+fishCounts2 <- Metrics_fish(fishCounts)
+```
+
+
+###Macro Counts
+Emily Wefelmeyer
+```{r}
+source("import_macro.R")
+macroCounts <- import_macro()
+
+aggr(macroCounts,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(macroCounts), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "MacroCounts")
+```
+No missing data
+
+### Calculate macro metrics
+Emily Wefelmeyer
+
+```{r}
+source("Metrics_macro.R")
+macroCounts2 <- Metrics_macro(macroCounts)
+```
+
+
+
+###Attribute data for each site
+###Water Quality Measures for entire system
+Emily Wefelmeyer
+```{r}
+source("import_attribute_micro.R")
+attribute_micro <- import_attribute_micro()
+attributes <- attribute_micro[[1]]
+micro <- attribute_micro[[2]]
+
+rm(attribute_micro)
+
+aggr(attributes,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(attributes), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Attributes")
+
+(list_na <- colnames(attributes)[ apply(attributes, 2, anyNA)])
+
+rm(list_na)
+```
+Missing data not causing issue
+
+
+
+####Fix TimeDate stamps
+Subset dataframes by DTS
+```{r}
+startDate <- as.numeric(year(max(min(fishCounts2$DateTime), 
+                 min(macroCounts2$DateTime))))
+
+startDate <- as.POSIXct(ISOdate(startDate, 01, 01, 0, 0, 0, tz = "UTC"))
+
+endDate <- as.numeric(year(min(max(fishCounts2$DateTime),
+               max(macroCounts2$DateTime))))
+
+endDate <- as.POSIXct(ISOdate(endDate, 12, 31, 23, 59, 59, tz = "UTC"))
+
+#DateTime
+DateTime <- as.data.frame(seq.POSIXt(startDate, endDate, by = "4 hours"))
+colnames(DateTime) <- "DateTime"
+```
+
+
+
+###Average data over previous 4 hour period
+####Micro data
+Sridhar Ravula
+```{r}
+hourseq = seq.POSIXt(startDate, endDate, by='4 hour')
+microt<- micro %>%
+   group_by(DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+microt$DateTime <- as.POSIXct(microt$DateTime, 
+                             format = "%Y-%m-%d %H:%M", tz = "UTC")
+
+
+micro2 <- merge(DateTime, 
+                  microt, 
+                  by = "DateTime")
+rm(microt, micro)
+
+summary(micro2)
+```
+
+####Chemistry data
+Sridhar Ravula
+```{r}
+chemistry2t<- chemistry2 %>%
+   group_by(StationID, StationName,DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+chemistry2t$DateTime <- as.POSIXct(chemistry2t$DateTime, 
+                             format = "%Y-%m-%d %H:%M", tz="UTC")
+chemistry3 <- merge(DateTime,
+                    chemistry2t,
+                    by = "DateTime")
+
+rm(chemistry2t, chemistry2)
+
+summary(chemistry3)
+```
+Remove variables with NAs only
+```{r}
+chemistry3$`BOD5 (mg/l)` <- NULL
+chemistry3$`Copper (ug/l)` <- NULL
+chemistry3$`Fecal Coliform (#/100ml)` <- NULL
+chemistry3$`Fluoride (mg/l)` <- NULL
+chemistry3$`Kjeld Nitrogen (mg/l)` <- NULL
+chemistry3$`Lead (ug/l)` <- NULL
+chemistry3$`Nickel (ug/l)` <- NULL
+chemistry3$`Residue (mg/l)` <- NULL
+chemistry3$`Zinc (ug/l)` <- NULL
+```
+####Fish Counts
+Emily Wefelmeyer
+```{r}
+temp <- fishCounts2 %>%
+   group_by(Station_ID, Site.Name, 
+            DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+temp$DateTime <- as.POSIXct(temp$DateTime, 
+                             format = "%Y-%m-%d %H:%M", tz = "UTC")
+fishCounts2 <- merge(DateTime,
+                    temp,
+                    by = "DateTime")
+rm(temp)
+
+summary(fishCounts2)
+```
+
+####Macro Counts
+Emily Wefelmeyer
+```{r}
+temp <- macroCounts2 %>%
+   group_by(Station_ID, Station.Name,
+            DateTime = cut(DateTime, breaks=hourseq)) %>%
+   summarise_all(mean)  %>% drop_na(DateTime)
+
+temp$DateTime <- as.POSIXct(temp$DateTime, 
+                             format = "%Y-%m-%d %H:%M", tz = "UTC")
+macroCounts2 <- merge(DateTime,
+                    temp,
+                    by = "DateTime")
+
+rm(temp, hourseq)
+
+summary(macroCounts2[,1:100])
+summary(macroCounts2[,101:length(macroCounts2)])
+
+rm(DateTime)
+```
+
+#Check missing data
+Emily Wefelmeyer
+```{r}
+aggr(chemistry3,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(chemistry3), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Chemistry")
+
+chemistry3$CountNA <- apply(chemistry3, MARGIN = 1, function(x) sum(is.na(x)))
+chemistry3 <- chemistry3[!(chemistry3$CountNA == 52), ]
+chemistry3$CountNA <- NULL
+```
+Emily Wefelmeyer
+```{r}
+aggr(micro2,
+     col = c("navyblue", 
+             "yellow"),
+     numbers = TRUE, 
+     sortVars = TRUE,
+     labels = names(micro2), 
+     cex.axis = 0.7,
+     gap = 3, 
+     ylab = c("Missing Data", "Pattern"), 
+     main = "Micro")
+
+micro2$CountNA <- apply(micro2, MARGIN = 1, function(x) sum(is.na(x)))
+micro2 <- micro2[!(micro2$CountNA == 5), ]
+micro2$CountNA <- NULL
+```
+
+####Rename StationIDs for consistency
+Emily Wefelmeyer
+```{r}
+#Rename StationID#s for consistency
+fishCounts2$StationID <- fishCounts2$Station_ID
+fishCounts2$Station_ID <- NULL
+
+macroCounts2$StationID <- macroCounts2$Station_ID
+macroCounts2$Station_ID <- NULL
+
+attributes$StationID <- attributes$Station.ID
+attributes$Station.ID <- NULL
+```
+
+### Combine all Data frames
+Emily Wefelmeyer
+```{r}
+Station = as.numeric(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
+
+###Combine chemistry, fish count & macro count data
+#Create initial data frame from varous pieces
+chem <- subset(chemistry3, StationID == Station[1])
+fish <- subset(fishCounts2, StationID == Station[1])
+macro <- subset(macroCounts2, StationID == Station[1])
+
+#Combine fish & macro counts
+temp <- merge(fish,
+              macro,
+              by = "DateTime",
+              all = TRUE)
+
+#Add in chemistry
+temp <- merge(chem,
+              temp,
+              by = "DateTime",
+              all = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(Station[1], times = nrow(temp))
+
+#Create initial data frame
+allData <- temp
+rm(temp)
+
+#Combine rest of the data frames
+for(station in Station[2:length(Station)]) {
+  chem <- subset(chemistry3, StationID == station)
+  fish <- subset(fishCounts2, StationID == station)
+  macro <- subset(macroCounts2, StationID == station)
+  
+  #Combine fish & macro counts
+  temp <- merge(fish,
+                macro,
+                by = "DateTime",
+                all = TRUE)
+  
+  
+  #Add chemistry data
+  temp <- merge(chem,
+                temp,
+                by = "DateTime",
+                all = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+
+  #Add station's data to the full data set
+  ifelse(nrow(temp) > 0, 
+    (allData[(nrow(allData)+1):(nrow(allData) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    allData <- allData)
+}
+
+#rename data frame
+allData$StationID.x <- NULL
+allData$StationID.y <- NULL
+
+
+rm(chem, fish, macro, temp, station, Station)
+
+
+##Add attributes
+allData <- merge(allData,
+                 attributes,
+                 by = "StationID")
+
+##Combine micro df with fish & macro counts df
+allData <- merge(allData,
+                 micro2,
+                 by = c("DateTime"),
+                 all.x = TRUE)
+```
+
+```{r}
+summary(allData[,1:85])
+```
+
+```{r}
+summary(allData[,86:171])
+```
+
+```{r}
+summary(allData[,172:257])
+```
+
+```{r}
+summary(allData[,258:343])
+```
+
+```{r}
+summary(allData[,344:length(allData)])
+```
+
+```{r}
+allData$CountNA <- NULL
+```
+All of the rows and columns have something in them.
+
+
+###Variance within variables
+Igor Pilja
+```{r}
+if (!require('assertthat')) install.packages('assertthat', quiet=TRUE)
+library(assertthat)
+clmnNamesList<-c(colnames(allData))
+newList1 <- c()
+for (i in 1:(length(allData))) {
+  #print(paste('Column name: ',clmnNamesList[i]))
+  colNm<-clmnNamesList[i]
+  toList<-as.list(allData[i])
+  newList <- c()
+  count1<-0
+  flag<-FALSE
+  j<-0
+  k<-0
+  for (j in toList) {
+    for (k in j) {
+      if(is.string(k)){
+         flag<-TRUE
+         #strVal<-'COLUMN HAS STRING VALUES!'
+        # print(paste('COLUMN HAS STRING VALUES!'))
+         break
+       }
+      if(!is.na(k)){
+       newList[count1]<-k
+       count1=count1+1
+      }
+    }
+     if(flag){
+       break
+     }
+    break
+  }
+  # if(!flag){
+  #   print(paste('MEAN: ',mean(newList)))
+  #   print(paste('SD: ',sd(newList)))
+  #   print(paste('RANGE: ',max(newList)-min(newList)))
+  # }
+  if(!flag){
+    mn<-mean(newList)
+    stdv<-sd(newList)
+    rng<-max(newList)-min(newList)
+    nlst<- cbind(colNm, mn, stdv, rng, min(newList), max(newList))
+    newList1<-rbind(newList1,nlst)
+    
+  }
+  if(flag){
+    newList1<- newList1
+  }
+  toList<-c()
+}
+
+rm(clmnNamesList, colNm, count1, flag, i, j, k, mn, newList, rng, stdv, toList)
+  
+colnames(newList1) <- c("Variable",
+                          "Mean", 
+                          "Standard Deviation", 
+                          "Range", 
+                          "Minimum", 
+                          "Maximum")
+  lstToDf<-as.data.frame(newList1)
+  write.csv(lstToDf,"VariableVariance.csv")
+  plot(allData$WaterTemp, allData$DateTime)
+  plot(allData$WaterTemp)
+  plot(allData$DateTime, allData$O2Dis)
+  plot(allData$O2Dis)
+  plot(allData$SpCond, allData$DateTime)
+  plot(allData$SpCond)
+  plot(allData$Turbidity, allData$DateTime)
+  plot(allData$Turbidity)
+  plot(allData$pH, allData$DateTime)
+  plot(allData$pH)
+  
+  plot(allData$pielou, allData$DateTime,xlab="Pielou",ylab="Date and Time")
+  plot(allData$pielou,ylab="Pielou")
+  plot(allData$speciesCount,allData$DateTime,xlab="Species Count",ylab="Date and Time")
+  plot(allData$speciesCount,ylab="Species Count")
+  plot(allData$Hills_N1,allData$DateTime,xlab="Hills N1",ylab="Date and Time")
+  plot(allData$Hills_N1,ylab="Hills N1")
+  plot(allData$Hills_N2,allData$DateTime,xlab="Hills N2",ylab="Date and Time")
+  plot(allData$Hills_N2,ylab="Hills N2")
+  plot(allData$margalef,allData$DateTime,xlab="Margalef",ylab="Date and Time")
+  plot(allData$margalef,ylab="Margalef")
+
+rm(newList1, lstToDf, nlst)
+```
+
+#Site Variablility
+Ziyuan Huang
+```{r load_package}
+suppressMessages(library(readr))
+suppressMessages(library(Rfast))
+# suppressMessages(library(tibble))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(BBmisc))
+suppressMessages(library(reshape2))
+suppressMessages(library(dplyr))
+```
+
+```{r variability_load_packages}
+srbc.Data <- allData #suppressMessages(read_csv("allData.csv"))
+class(srbc.Data)
+```
+
+```
+Reference https://newonlinecourses.science.psu.edu/stat500/node/13/
+
+Measures of Variability
+
+  1. Range
+  2. Interquartile Range (IQR)
+  3. Variance
+  4. Standard Deviation
+
+```
+
+```
+I figured using measures of variability makes sense in our case to analyze the variability of water quality across Pine Creek stations. In this case, we could have a high level view of how do the data points differ between different Pine Creek stations.
+```
+
+```{r variability_get_num_data}
+norm_0_1 <- function(x){(x-min(x))/(max(x)-min(x))}
+numeric.variables <- unlist(lapply(srbc.Data, is.numeric))  
+srbc.num.Data <- (srbc.Data[ , numeric.variables])
+# variability_preprocess_data
+for(i in 1:ncol(srbc.num.Data)){
+  srbc.num.Data[is.na(srbc.num.Data[,i]), i] <- mean(srbc.num.Data[,i], na.rm = TRUE)
+  srbc.num.Data[is.nan(srbc.num.Data[,i]), i] <- 0
+  srbc.num.Data[,i] <- norm_0_1(srbc.num.Data[,i])
+}
+srbc.num.Data$StationID <- factor(allData$StationID)
+srbc.num.Data$StationName <- factor(allData$StationName)
+```
+
+```{r variability_ph}
+site_variability_dt <- data.frame(StationID = srbc.num.Data$StationID,
+                                  # StationName = srbc.num.Data$StationName,
+                                  Latitude = srbc.num.Data$Latitude,
+                                  Longitude = srbc.num.Data$Longitude,
+                                  pH = srbc.num.Data$pH
+                                  )
+
+data <- site_variability_dt
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude)
+calculated <- summarise(grouped, mean=mean(value), sd=sd(value), var = var(value), range = max(value)-min(value), iqr = IQR(value))
+
+for(i in 4:ncol(calculated)){
+  calculated[is.na(calculated[,i]), i] <- mean(data.matrix(calculated[,i]), na.rm = TRUE)
+  calculated[,i] <- norm_0_1(calculated[,i])
+}
+
+calculated
+```
+
+```{r variability_df}
+var_norm_df <- data.frame(
+  StationID = srbc.num.Data$StationID,
+  Latitude = srbc.num.Data$Latitude,
+  Longitude = srbc.num.Data$Longitude,
+  pH = (srbc.num.Data$pH),
+  O2Dis = (srbc.num.Data$O2Dis),
+  SpCond = (srbc.num.Data$SpCond),
+  Turbidity = (srbc.num.Data$Turbidity),
+  WaterTemp = (srbc.num.Data$WaterTemp)
+)
+
+data <- var_norm_df
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude, variable)
+
+var_norm_calculated <- summarise(grouped, 
+                        Mean=mean(value), 
+                        SD=sd(value), 
+                        Variance = var(value), 
+                        Range = max(value)-min(value), 
+                        IQR = IQR(value),
+                        Max = max(value),
+                        Min = min(value))
+
+# Replace NA with column mean
+for(i in 5:ncol(var_norm_calculated)){
+  var_norm_calculated[is.na(var_norm_calculated[,i]), i] <- mean(data.matrix(var_norm_calculated[,i]), na.rm = TRUE)
+  var_norm_calculated[,i] <- norm_0_1(var_norm_calculated[,i])
+}
+
+colnames(var_norm_calculated)[4] <- c("Variable")
+
+var_norm_calculated
+```
+
+```
+IQR and Boxplot
+```
+
+```{r variability_iqr_box}
+point_size = 0.5
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, pH, FUN = median), y=pH, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized pH") +
+      xlab("Station Ordered by pH Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, O2Dis, FUN = median), y=O2Dis, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized O2Dis") +
+      xlab("Station Ordered by O2Dis Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, SpCond, FUN = median), y=SpCond, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized SpCond") +
+      xlab("Station Ordered by SpCond Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Turbidity, FUN = median), y=Turbidity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Turbidity") +
+      xlab("Station Ordered by Turbidity Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p5 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, WaterTemp, FUN = median), y=WaterTemp, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Water Tempreature") +
+      xlab("Station Ordered by Water Tempreature Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+p5
+```
+
+```
+Range and Plot
+```
+
+```{r variability_range}
+pr <- ggplot(var_norm_calculated, aes(x=reorder(StationID, Range)))+
+        geom_linerange(aes(ymin=Min,ymax=Max),linetype=1,color="blue")+
+        geom_point(aes(y=Min),size=1,color="red")+
+        geom_point(aes(y=Max),size=1,color="red")+
+        ylab("Normalized Range") +
+        xlab("Range Across All Pine Creek Stations All Years Order by Range") +
+        facet_grid(rows = vars(Variable)) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8))
+pr
+```
+
+```{r variability_variance}
+pv <- ggplot(data=var_norm_calculated, aes(x=reorder(StationID, Variance), y=Variance, color=Variable, group=1)) +
+        geom_line()+
+        facet_grid(rows = vars(Variable)) +
+        geom_point() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8),
+              legend.position = "none") +
+        ylab("Normalized Variance") +
+        xlab("Variance Across All Pine Creek Stations All Years Order by Variance")
+pv
+```
+
+```{r variability_sd}
+ps <- ggplot(data=var_norm_calculated, aes(x=reorder(StationID, SD), y=SD, color=Variable, group=1)) +
+        geom_line()+
+        facet_grid(rows = vars(Variable)) +
+        geom_point() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+              axis.text.y.left = element_text(size = 8),
+              legend.position = "none") +
+        ylab("Normalized Standard Deviation") +
+        xlab("Standard Deviation Across All Pine Creek Stations All Years")
+ps
+```
+
+
+```{r}
+# Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+#  contrasts can be applied only to factors with 2 or more levels
+options( scipen = 0 )
+options( digits = 6 )
+nan_cols <- sapply(srbc.num.Data, function(x) all(is.nan(x)))
+srbc.num.Data <- srbc.num.Data[,!nan_cols]
+na_cols <- sapply(srbc.num.Data, function(x) all(is.na(x)))
+srbc.num.Data <- srbc.num.Data[,!na_cols]
+suppressMessages(attach(srbc.num.Data))
+StationID <- factor(StationID)
+
+column_names <- c()
+flag <- TRUE
+
+for (i in names(srbc.num.Data)) {
+  if (flag == TRUE && i != "StationID") {
+    column_names <- c(column_names,paste0("`",i,"`"))
+    flag <- FALSE
+  } else if (i != "StationID" && i != "StationName" && i != "Latitude" && i != "Longitude") {
+    column_names <- c(column_names,paste0(", `",i,"`"))
+  }
+}
+
+combine_Y <- paste0("Y <- cbind(",paste0(column_names, sep="", collapse=""),")")
+eval(parse(text = combine_Y))
+
+fit <- manova(Y ~ StationID)
+
+sum.fit.wilks <- summary(fit, intercept = TRUE, tol=0, test = "Wilks")
+
+sum.aov <- summary.aov(fit)
+
+```
+
+```{r}
+# options( scipen=999 )
+options( scipen = 0 )
+options( digits = 6 )
+PrF_Table <- c(Variable = c(), PrF = c())
+
+for (i in names(srbc.num.Data)) {
+  if (i != "StationID" && i != "StationName" && i != "Latitude" && i != "Longitude") {
+    qry_sum_Name <- paste0("Variable <- '",i,"'")
+    qry_sum_PrF <- paste0("PrF <- sum.aov$` Response ",i,"`[,5][1]")
+    # print(qry_sum_Name)
+    eval(parse(text = qry_sum_Name))
+    PrF_Table$Variable <- append(PrF_Table$Variable, Variable)
+    
+    #print(qry_sum_PrF)
+    eval(parse(text = qry_sum_PrF))
+    PrF_Table$PrF <- append(PrF_Table$PrF, PrF)
+    
+  }
+}
+
+PrF_Table <- data.frame(PrF_Table)
+PrF_Table$PrF <- round(PrF_Table$PrF,30)
+PrF_Table
+```
+
+```{r}
+PrF_Table_Sig <- subset(PrF_Table,PrF_Table$PrF <= 0.05)
+PrF_Table_Sig
+```
+
+```{r}
+PrF_Table_Sig[order(PrF_Table_Sig$Variable),]
+```
+
+```{r variability_new}
+var_norm_df <- data.frame(
+  StationID = srbc.num.Data$StationID,
+  Latitude = srbc.num.Data$Latitude,
+  Longitude = srbc.num.Data$Longitude,
+  
+  # pick up 3 chemistry elements for data viz
+  Barium = (srbc.num.Data$`Barium (ug/l)`),
+  Iron = (srbc.num.Data$`Iron (ug/l)`),
+  Magnesium = (srbc.num.Data$`Magnesium (mg/l)`),
+  
+  # pick up 3 PA native fishes for data viz
+  Bluegill = (srbc.num.Data$bluegill),
+  Rock_Bass = (srbc.num.Data$rock_bass),
+  Largemouth_Bass = (srbc.num.Data$largemouth_bass),
+  
+  # pick up species count and disersity indexes for data viz
+  SpeciesCount = (srbc.num.Data$speciesCount),  
+  Pielou = (srbc.num.Data$pielou),
+  Hills_N1 = (srbc.num.Data$Hills_N1),
+  Hills_N2 = (srbc.num.Data$Hills_N2),
+  
+  # pick up a few Benthic macroinvertebrates (BMI) for data viz
+  Acentrella = srbc.num.Data$acentrella,
+  Baetis = srbc.num.Data$baetis,
+  Chimarra = srbc.num.Data$chimarra,
+  Dytiscidae = srbc.num.Data$dytiscidae,
+  
+  # pick up a plant underwater for data viz
+  Limnophila = srbc.num.Data$limnophila,
+  
+  # stream order
+  Stream_Order = srbc.num.Data$StreamOrder,
+  Stream_Density = srbc.num.Data$StreamDensity,
+  
+  # raining
+  Annual_Precip = srbc.num.Data$Annual.Precip,
+  Mar_Precip = srbc.num.Data$Mar.Precip,
+  Jun_Precip = srbc.num.Data$Jun.Precip,
+  Sep_Precip = srbc.num.Data$Sep.Precip,
+  Dec_Precip = srbc.num.Data$Dec.Precip,
+  
+  # type of land
+  MixForest = srbc.num.Data$`MixForest..`,
+  Shrub = srbc.num.Data$`Shrub..`,
+  Wetland = srbc.num.Data$`Wetland..`,
+
+  # about the water
+  Water_Capacity = srbc.num.Data$Available.Water.Capacity,
+  Percent_Clay = srbc.num.Data$Percent.Clay,
+  Permeability = srbc.num.Data$Permeability,
+  Thickness = srbc.num.Data$Thickness
+
+)
+
+data <- var_norm_df
+melted <- melt(data, id.vars=c("StationID", "Latitude", "Longitude"))
+
+grouped <- group_by(melted, StationID, Latitude, Longitude, variable)
+
+var_norm_calculated <- summarise(grouped, 
+                        Mean=mean(value), 
+                        SD=sd(value), 
+                        Variance = var(value), 
+                        Range = max(value)-min(value), 
+                        IQR = IQR(value),
+                        Max = max(value),
+                        Min = min(value))
+
+# Replace NA with column mean
+for(i in 5:ncol(var_norm_calculated)){
+  var_norm_calculated[is.na(var_norm_calculated[,i]), i] <- mean(data.matrix(var_norm_calculated[,i]), na.rm = TRUE)
+  var_norm_calculated[,i] <- norm_0_1(var_norm_calculated[,i])
+}
+
+colnames(var_norm_calculated)[4] <- c("Variable")
+
+var_norm_calculated
+```
+
+```{r chemistry_elements}
+  # pick up 3 chemistry elements for data viz
+  # Barium = (srbc.num.Data$`Barium (ug/l)`),
+  # Iron = (srbc.num.Data$`Iron (ug/l)`),
+  # Magnesium = (srbc.num.Data$`Magnesium (mg/l)`),
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Barium (ug/l)`, FUN = median), y=`Barium (ug/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Barium (ug/l)") +
+      xlab("Station Ordered by Barium Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Iron (ug/l)`, FUN = median), y=`Iron (ug/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Iron (ug/l)") +
+      xlab("Station Ordered by Iron Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Magnesium (mg/l)`, FUN = median), y=`Magnesium (mg/l)`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Magnesium (mg/l)") +
+      xlab("Station Ordered by Magnesium Median") +
+      theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # pick up 3 PA native fishes for data viz
+  # Bluegill = (srbc.num.Data$bluegill),
+  # Rock_Bass = (srbc.num.Data$rock_bass),
+  # Largemouth_Bass = (srbc.num.Data$largemouth_bass),
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, bluegill, FUN = median), y=bluegill, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Bluegill Count") +
+      xlab("Station Ordered by Bluegill Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, rock_bass, FUN = median), y=rock_bass, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Rock Bass Count") +
+      xlab("Station Ordered by Rock Bass Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, largemouth_bass, FUN = median), y=largemouth_bass, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Largemouth Bass Count") +
+      xlab("Station Ordered by Largemouth Bass Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # pick up species count and disersity indexes for data viz
+  # SpeciesCount = (srbc.num.Data$speciesCount),  
+  # Pielou = (srbc.num.Data$pielou),
+  # Hills_N1 = (srbc.num.Data$Hills_N1),
+  # Hills_N2 = (srbc.num.Data$Hills_N2),
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, speciesCount, FUN = median), y=speciesCount, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Species Count") +
+      xlab("Station Ordered by Species Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, pielou, FUN = median), y=pielou, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Pielou Index") +
+      xlab("Station Ordered by Pielou Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Hills_N1, FUN = median), y=Hills_N1, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Hill's N1 Index") +
+      xlab("Station Ordered by Hill's N1 Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Hills_N2, FUN = median), y=Hills_N2, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Hill's N2 Index") +
+      xlab("Station Ordered by Hill's N2 Index Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+```{r}
+  # pick up a few Benthic macroinvertebrates (BMI) for data viz
+  # Acentrella = srbc.num.Data$acentrella,
+  # Baetis = srbc.num.Data$baetis,
+  # Chimarra = srbc.num.Data$chimarra,
+  # Dytiscidae = srbc.num.Data$dytiscidae,
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, acentrella, FUN = median), y=acentrella, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Acentrella Count") +
+      xlab("Station Ordered by Acentrella Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, baetis, FUN = median), y=baetis, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Baetis Count") +
+      xlab("Station Ordered by Baetis Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, chimarra, FUN = median), y=chimarra, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Chimarra Count") +
+      xlab("Station Ordered by Chimarra Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, dytiscidae, FUN = median), y=dytiscidae, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Dytiscidae Count") +
+      xlab("Station Ordered by Dytiscidae Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+```{r}
+  # pick up a plant underwater for data viz
+  # Limnophila = srbc.num.Data$limnophila,
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, limnophila, FUN = median), y=limnophila, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Limnophila Count") +
+      xlab("Station Ordered by Limnophila Count Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+
+```
+
+```{r}
+  # stream order
+  # Stream_Order = srbc.num.Data$StreamOrder,
+  # Stream_Density = srbc.num.Data$StreamDensity,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, StreamOrder, FUN = median), y=StreamOrder, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Stream Order") +
+      xlab("Station Ordered by Stream Order Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, StreamDensity, FUN = median), y=StreamDensity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Stream Density") +
+      xlab("Station Ordered by Stream Density Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+```
+
+```{r}  
+  # raining
+  # Annual_Precip = srbc.num.Data$Annual.Precip,
+  # Mar_Precip = srbc.num.Data$Mar.Precip,
+  # Jun_Precip = srbc.num.Data$Jun.Precip,
+  # Sep_Precip = srbc.num.Data$Sep.Precip,
+  # Dec_Precip = srbc.num.Data$Dec.Precip,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Annual.Precip, FUN = median), y=Annual.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Annual Precip") +
+      xlab("Station Ordered by Annual Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Mar.Precip, FUN = median), y=Mar.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Mar Precip") +
+      xlab("Station Ordered by Mar Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Jun.Precip, FUN = median), y=Jun.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Jun Precip") +
+      xlab("Station Ordered by Jun Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Sep.Precip, FUN = median), y=Sep.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Sep Precip") +
+      xlab("Station Ordered by Sep Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p5 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Dec.Precip, FUN = median), y=Dec.Precip, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Dec Precip") +
+      xlab("Station Ordered by Dec Precip Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+p5
+```
+
+```{r}
+  # type of land
+  # MixForest = srbc.num.Data$`MixForest..`,
+  # Shrub = srbc.num.Data$`Shrub..`,
+  # Wetland = srbc.num.Data$`Wetland..`,
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `MixForest..`, FUN = median), y=`MixForest..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Mix Forest") +
+      xlab("Station Ordered by Mix Forest Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Shrub..`, FUN = median), y=`Shrub..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Shrub") +
+      xlab("Station Ordered by Shrub Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, `Wetland..`, FUN = median), y=`Wetland..`, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Wetland") +
+      xlab("Station Ordered by Wetland Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+```
+
+```{r}
+  # about the water
+  # Water_Capacity = srbc.num.Data$Available.Water.Capacity,
+  # Percent_Clay = srbc.num.Data$Percent.Clay,
+  # Permeability = srbc.num.Data$Permeability,
+  # Thickness = srbc.num.Data$Thickness
+
+p1 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Available.Water.Capacity, FUN = median), y=Available.Water.Capacity, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Available Water Capacity") +
+      xlab("Station Ordered by Available Water Capacity Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p2 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Percent.Clay, FUN = median), y=Percent.Clay, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Percent Clay") +
+      xlab("Station Ordered by Percent Clay Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p3 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Permeability, FUN = median), y=Permeability, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Permeability") +
+      xlab("Station Ordered by Permeability Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p4 <- ggplot(srbc.num.Data, aes(x=reorder(StationID, Thickness, FUN = median), y=Thickness, color=StationID)) +
+      geom_boxplot(outlier.size = point_size) +
+      geom_point(size = point_size) +
+      ylab("Normalized Thickness") +
+      xlab("Station Ordered by Thickness Median") +
+      theme(legend.position="none",
+            axis.text.x = element_text(angle = 90, hjust = 1, size = 8))
+
+p1
+p2
+p3
+p4
+```
+
+#Diversity by Regions
+Sridhar Ravula
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+if (!require('ggthemes')) install.packages('ggthemes', quiet=TRUE)
+library(ggthemes)
+if (!require('scales')) install.packages('scales', quiet=TRUE)
+library(scales)
+
+#library(ggmap)
+
+
+##Geerate Temp datatframe----
+allDatat<- allData%>% drop_na(pielou)
+#allDatat<- my_data%>% drop_na(pielou)
+
+allDatat <- allDatat[,c("StationID","StreamOrder","DateTime","Longitude", "Latitude","pielou","Hills_N1", "Hills_N2")]
+allDatat$Long2 <- round(allDatat$Longitude,1)
+allDatat$Lat2 <- round(allDatat$Latitude,1)
+allDatat$LongLat2 <- paste(allDatat$Lat2,"-",allDatat$Long2)
+
+#saveRDS(allDatat, "allDatat_01142019.rds")
+#table(allDatat$LongLat2)
+
+
+DiversityP <- ggplot(allDatat, aes(DateTime, pielou)) +
+  geom_point() +
+  xlab("Date") + ylab("Diversity ") +
+  #scale_x_date(labels=date_format ("%m-%y"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold",
+                                  size = 20)) +
+  theme(text = element_text(size=18))
+
+#DiversityP
+
+DiversityP + facet_grid(LongLat2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Lat-Long") 
+DiversityP + facet_grid(Long2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Long")
+DiversityP + facet_grid(Lat2 ~ . )+
+  ggtitle("Pielou Diversity by Modified Lat") 
+DiversityP + facet_grid(StreamOrder ~ . )+
+  ggtitle("Pielou Diversity by StreamOrder") 
+
+
+
+
+DiversityH1 <- ggplot(allDatat, aes(DateTime, Hills_N1)) +
+  geom_point() +
+  xlab("Date") + ylab("Diversity ") +
+  #scale_x_date(labels=date_format ("%m-%y"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold",
+                                  size = 20)) +
+  theme(text = element_text(size=18))
+
+DiversityH1 + facet_grid(LongLat2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Lat-Long") 
+DiversityH1 + facet_grid(Long2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Long")
+DiversityH1 + facet_grid(Lat2 ~ . )+
+  ggtitle("Hills_N1 Diversity by Modified Lat") 
+DiversityH1 + facet_grid(StreamOrder ~ . )+
+  ggtitle("Hills_N1 Diversity by StreamOrder") 
+```
+
+
+
+### Calculate Correlaton between FishCount and Fish metrics
+Pranita Patil
+```{r}
+if (!require('ggplot2')) install.packages('ggplot2', quiet=TRUE)
+library(ggplot2)
+if (!require('reshape2')) install.packages('reshape2', quiet=TRUE)
+library(reshape2)
+
+
+# Calculate Correlation matrix for fish data along with fish metrics
+allData3 <- fishCounts2[,-c(1:3)]
+
+corre_ent3 <- rcorr(as.matrix(allData3))
+
+cor_coef3 <- corre_ent3$r
+cor_p3 <- corre_ent3$P
+
+# function to visualize correlation matrix
+ggheatmap <- function(upper_tri, upper_tri_p, i) 
+{
+  # Melt the correlation matrix
+diag(upper_tri_p) <- Inf
+  melted_cormat <- melt(upper_tri)
+melted_cormat_p <- melt(upper_tri_p)
+melted_cormat_stars <- cut(melted_cormat_p$value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+ggheatmap1 <-ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+                       midpoint = 0, limit = c(-1,1), space = "Lab",
+                       name="Pearson\nCorrelation") +
+  geom_text(aes(label=melted_cormat_stars), color="black", size=2) +
+  geom_tile(data = subset(melted_cormat,  is.na(value)),fill = "white")+
+  geom_tile(data = subset(melted_cormat_p,  is.na(value)),fill = "white")+
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 9, hjust = 1))+
+  coord_fixed()
+
+# Print the heatmap
+print(ggheatmap1)
+ggsave(ggheatmap1, file=paste0("plot_corr_fish_data", i,".png"), width = 20, height = 20, units = "cm")
+
+}
+
+# Visualize Correlation matrix as whole 
+rcoeff <-(cor_coef3)
+rpvalue <- (cor_p3)
+ggheatmap(rcoeff, rpvalue, 1)
+
+# Visualize above Correlation matrix in two parts for visibility
+rcoeff1 <-(cor_coef3[1:30,31:60])
+rpvalue1 <- (cor_p3[1:30,31:60])
+ggheatmap(rcoeff1, rpvalue1, 2)
+
+rcoeff2 <-(cor_coef3[31:60,31:60])
+rpvalue2 <- (cor_p3[31:60,31:60])
+ggheatmap(rcoeff2, rpvalue2, 3)
+```
+
+### Calculate correlations
+Pranita Patil
+```{r}
+source("Corr_SRBC.R")
+corr_results <- Corr_SRBC(allData)
+
+# correlation Coefficients and P values
+cor_coef2 <- corr_results[[1]]
+cor_p2 <- corr_results[[2]]
+
+# # Use upper triangle of the correlation matrix
+# get_upper_tri <- function(cormat){
+#   cormat[lower.tri(cormat)]<- NA
+#   return(cormat)
+# }
+
+
+k=1
+# corplots = list()
+
+for (i in seq(1, 142, by=29))
+  for (j in seq(1, 142, by=29))
+{
+    # get whole correlation matrix
+    if(i==117 & j!=117){
+    upper_tri <- (cor_coef2[i:(i+25),j:(j+28)])
+    upper_tri_p <- (cor_p2[i:(i+25),j:(j+28)])  
+    }
+    else if(j==117 & i!=117){
+      upper_tri <- (cor_coef2[i:(i+28),j:(j+25)])
+      upper_tri_p <- (cor_p2[i:(i+28),j:(j+25)]) 
+    }
+    else if(j==117 & i==117){
+      upper_tri <- (cor_coef2[i:(i+25),j:(j+25)])
+      upper_tri_p <- (cor_p2[i:(i+25),j:(j+25)]) 
+    }
+    else{
+    upper_tri <- (cor_coef2[i:(i+28),j:(j+28)])
+    upper_tri_p <- (cor_p2[i:(i+28),j:(j+28)])
+    }
+    if(k==1 | k==7 | k==13 | k==19 | k==25 ){
+      diag(upper_tri_p) <- Inf
+    }
+    # Melt the correlation matrix
+    melted_cormat <- melt(upper_tri)
+    melted_cormat_p <- melt(upper_tri_p)
+    melted_cormat_stars <- cut(melted_cormat_p$value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))  
+    
+    # Use ggplot to visualize correlation matrix
+    ggheatmap2 <-ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+      geom_tile(color = "white")+
+      scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+                           midpoint = 0, limit = c(-1,1), space = "Lab",
+                           name="Pearson\nCorrelation") +
+      geom_text(aes(label=melted_cormat_stars), color="black", size=2) +
+      geom_tile(data = subset(melted_cormat,  is.na(value)),fill = "white")+
+      geom_tile(data = subset(melted_cormat_p,  is.na(value)),fill = "white")+
+      theme_minimal()+ # minimal theme
+      theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                       size = 9, hjust = 1))+
+      coord_fixed()
+    
+    # Print the heatmap
+    print(ggheatmap2)
+    
+    # save the heatmap
+    ggsave(ggheatmap2, file=paste0("AllData_Corr_plot_", k,".png"), width = 20, height = 20, units = "cm")
+
+ #corplots[[k]] = ggheatmap2
+ k=k+1
+
+}
+
+## To save all images in PDF file
+# pdf("corr_plots.pdf")
+# for (l in 1:25) {
+#   print(corplots[[l]])
+# }
+# dev.off()
+
+
+rm(rpvalue, rcoeff, allData3, rpvalue1, rcoeff1, rpvalue2, rcoeff2, upper_tri_p, corre_ent3, cor_coef3, cor_p3, cor_coef2, corr_results, cor_p2, ggheatmap2, melted_cormat, melted_cormat_p, melted_cormat_stars, i, j, upper_tri, k)
+```
+
+#Data frame for analysis
+### Fish
+Emily Wefelmeyer
+
+####Clean fish data to just metrics
+```{r}
+t <- fishCounts2
+
+fishCounts2 <- t %>% dplyr::select(DateTime, 
+                                   StationID,
+                                   Site.Name, 
+                                   pielou, 
+                                   speciesCount, 
+                                   Hills_N1, 
+                                   Hills_N2, 
+                                   margalef)
+```
+
+```{r}
+Station = as.numeric(sort(unique(c(chemistry3$StationID, fishCounts2$StationID, macroCounts2$StationID))))
+
+###Combine chemistry, fish count & macro count data
+#Create initial data frame from varous pieces
+chem <- subset(chemistry3, StationID == Station[1])
+fish <- subset(fishCounts2, StationID == Station[1])
+
+
+
+#Combine chemistry & fish data
+temp <- merge(chem,
+              fish,
+              by = "DateTime",
+              all.y = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(Station[1], times = nrow(temp))
+
+#Create initial data frame
+fishData <- temp
+rm(temp)
+
+#Combine rest of the data frames
+for(station in Station[2:length(Station)]) {
+  chem <- subset(chemistry3, StationID == station)
+  fish <- subset(fishCounts2, StationID == station)
+  
+  
+  #Chemistry + Fish data
+  temp <- merge(chem,
+                fish,
+                by = "DateTime",
+                all.y = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+
+  #Add station's data to the full data set
+  ifelse(nrow(temp) > 0, 
+    (fishData[(nrow(fishData)+1):(nrow(fishData) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    fishData <- fishData)
+}
+
+#rename data frame
+fishData$StationID.x <- NULL
+fishData$StationID.y <- NULL
+
+
+rm(chem, fish, temp, station)
+
+
+##Combine micro df with fish & macro counts df
+fishData <- merge(fishData,
+                 micro2,
+                 by = c("DateTime"),
+                 all.x = TRUE)
+
+fishData$`Ammonia-N (mg/l)` <- NULL
+fishData$`Nitrite (mg/l)` <- NULL
+```
+
+```{r}
+describe(fishData[,1:20])
+```
+
+```{r}
+describe(fishData[,21:40])
+```
+
+```{r}
+describe(fishData[,41:length(fishData)])
+```
+
+### Macro
+
+#### Clean Macro data
+```{r}
+t <- macroCounts2
+
+macroCounts2 <- t %>% dplyr::select(DateTime, 
+                                   StationID,
+                                   Station.Name, 
+                                   pielou_macro, 
+                                   speciesCount_macro, 
+                                   Hills_N1_macro, 
+                                   Hills_N2_macro, 
+                                   margalef_macro)
+```
+
+```{r}
+###Combine chemistry, fish count & macro count data
+#Create initial data frame from varous pieces
+chem <- subset(chemistry3, StationID == Station[1])
+macro <- subset(macroCounts2, StationID == Station[1])
+
+#Combine macro counts & chemistry data
+temp <- merge(chem,
+              macro,
+              by = "DateTime",
+              all.y = TRUE)
+
+#Clean to have unified station ID
+temp$StationID <- rep(Station[1], times = nrow(temp))
+
+#Create initial data frame
+macroData <- temp
+rm(temp)
+
+#Combine rest of the data frames
+for(station in Station[2:length(Station)]) {
+  chem <- subset(chemistry3, StationID == station)
+  macro <- subset(macroCounts2, StationID == station)
+  
+  #Combine macro counts & chemistry data
+  temp <- merge(chem,
+                macro,
+                by = "DateTime",
+                all.y = TRUE)
+  
+  #Clean to have unified station ID
+  temp$StationID <- rep(station, times = nrow(temp))
+
+  #Add station's data to the full data set
+  ifelse(nrow(temp) > 0, 
+    (macroData[(nrow(macroData)+1):(nrow(macroData) + nrow(temp)),] <- temp[1:nrow(temp),]),
+    macroData <- macroData)
+}
+
+#rename data frame
+macroData$StationID.x <- NULL
+macroData$StationID.y <- NULL
+
+
+rm(chem, macro, temp, station)
+
+
+##Combine micro df with fish & macro counts df
+macroData <- merge(macroData,
+                 micro2,
+                 by = c("DateTime"),
+                 all.x = TRUE)
+
+macroData$`Ammonia-N (mg/l)` <- NULL
+macroData$`Nitrite (mg/l)` <- NULL
+```
+
+```{r}
+describe(macroData[,1:20])
+```
+
+```{r}
+describe(macroData[,21:40])
+```
+
+```{r}
+describe(macroData[,41:length(macroData)])
+```
+
+### Build GLM
+```{r}
+source("GLM_SRBC.R")
+GLM_results <- GLM_SRBC()
+```
+
+### Build GAM
+```{r}
+source("GAM_SRBC.R")
+GAM_results <- GAM_SRBC()
+```
+
+### combining GLM & GAM 
+```{r}
+source("GLM_GAM_SRBC.R")
+GLM_GAM_results <- GLM_GAM_SRBC()
+```

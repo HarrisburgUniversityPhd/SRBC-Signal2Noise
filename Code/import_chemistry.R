@@ -7,7 +7,7 @@ import_chemistry <- function() {
   
   url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/AllPineCreekChemistry.csv"
   
-  skip = 1
+  skip = 0
   
   colNames <- c("StationID",
                 "StationName",
@@ -27,7 +27,7 @@ import_chemistry <- function() {
   
   url <- "https://raw.githubusercontent.com/HarrisburgUniversityPhd/SRBC-Signal2Noise/master/Data/2018PineHU.csv"
   
-  skip = 1
+  skip = 0
   
   colNames <- c("StationID",
                 "StationName",
@@ -50,6 +50,32 @@ import_chemistry <- function() {
   
   
   ####Clean up chemistry data
+  chemistry$RDL = NULL #Not going to be used 
+  
+  #Clean Results
+  chemistry <- within(chemistry,
+                      Results[Results == "Present Below Quantification Limit"] <- NA)
+  
+  chemistry <- within(chemistry,
+                      Results[Results == "Present Below Quantitification Level"] <- NA)
+  
+  chemistry <- within(chemistry,
+                      Results[Results == "Present Below Quantification Level"] <- NA)
+  
+  chemistry <- within(chemistry,
+                      Results[Results == "Present Below Quanitification Level"] <- NA)
+  
+  chemistry <- within(chemistry,
+                      Results[Results == "ND"] <- NA)
+  
+  chemistry$Results <- as.character(chemistry$Results)
+  
+  chemistry <- within(chemistry,
+                      Results[Results == "4..08"] <- "4.08")
+  
+  
+  chemistry$Results <- as.numeric(chemistry$Results)
+  
   #####Clean parameters
   
   #Change from factors to characters
@@ -117,28 +143,19 @@ import_chemistry <- function() {
   
   #Change "Aluminum (mg/l)" to "Aluminum (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Aluminum (mg/l)" & 
-                                 is.numeric(chemistry$Results) == TRUE &  
                                  !is.na(chemistry$Results)), 
                               chemistry$Results * 1000,
                               chemistry$Results)
   
-  chemistry$RDL <- ifelse((chemistry$Parameter == "Aluminum (mg/l)" & !is.na(chemistry$RDL)), 
-                          chemistry$RDL * 1000,
-                          chemistry$RDL)
   
   chemistry <- within(chemistry,
                       Parameter[Parameter == "Aluminum (mg/l)"] <- "Aluminum (ug/l)")
   
   #Change "Barium (mg/l)" to "Barium (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Barium (mg/l)" & 
-                                 is.numeric(chemistry$Results) == TRUE &  
                                  !is.na(chemistry$Results)), 
                               chemistry$Results * 1000,
                               chemistry$Results)
-  
-  chemistry$RDL <- ifelse((chemistry$Parameter == "Barium (mg/l)" & !is.na(chemistry$RDL)), 
-                          chemistry$RDL * 1000,
-                          chemistry$RDL)
   
   chemistry <- within(chemistry,
                       Parameter[Parameter == "Barium (mg/l)"] <- "Barium (ug/l)")
@@ -146,14 +163,9 @@ import_chemistry <- function() {
   
   #Change "Bromide (mg/l)" to "Bromide (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Bromide (mg/l)" & 
-                                 is.numeric(chemistry$Results) == TRUE & 
                                  !is.na(chemistry$Results)), 
                               chemistry$Results * 1000,
                               chemistry$Results)
-  
-  chemistry$RDL <- ifelse((chemistry$Parameter == "Bromide (mg/l)" & !is.na(chemistry$RDL)), 
-                          chemistry$RDL * 1000,
-                          chemistry$RDL)
   
   chemistry <- within(chemistry,
                       Parameter[Parameter == "Bromide (mg/l)"] <- "Bromide (ug/l)")
@@ -161,30 +173,20 @@ import_chemistry <- function() {
   
   #Change "Iron (mg/l)" to "Iron (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Iron (mg/l)" & 
-                                 is.numeric(chemistry$Results) == TRUE & 
                                  !is.na(chemistry$Results)), 
                               chemistry$Results * 1000,
                               chemistry$Results)
-  
-  chemistry$RDL <- ifelse((chemistry$Parameter == "Iron (mg/l)" & !is.na(chemistry$RDL)), 
-                          chemistry$RDL * 1000,
-                          chemistry$RDL)
-  
-  
+
   chemistry <- within(chemistry,
                       Parameter[Parameter == "Iron (mg/l)"] <- "Iron (ug/l)")
   
   
   #Change "Manganese (mg/l)" to "Manganese (ug/l)"
   chemistry$Results <- ifelse((chemistry$Parameter == "Manganese (mg/l)" & 
-                                 is.numeric(chemistry$Results) == TRUE & 
                                  !is.na(chemistry$Results)), 
                               chemistry$Results * 1000,
                               chemistry$Results)
   
-  chemistry$RDL <- ifelse((chemistry$Parameter == "Manganese (mg/l)" & !is.na(chemistry$RDL)), 
-                          chemistry$RDL * 1000,
-                          chemistry$RDL)
   
   chemistry <- within(chemistry,
                       Parameter[Parameter == "Manganese (mg/l)"] <- "Manganese (ug/l)")
@@ -192,24 +194,6 @@ import_chemistry <- function() {
   chemistry$Parameter <- as.factor(chemistry$Parameter)
   
   chemistry <- unique(chemistry)
-  #####Clean Results
-  
-  #Store the parameters & levels of those below quantification limit
-  chemistry$Results <- ifelse(chemistry$Results ==
-                                "Present Below Quantification Limit", 
-                              ifelse(is.na(chemistry$RDL),
-                                     chemistry$Results,
-                                     paste("<", chemistry$RDL, sep = "")),
-                              chemistry$Results)
-  
-  chemistry$Results <- ifelse(is.na(chemistry$Results),
-                              ifelse(is.na(chemistry$RDL),
-                                     chemistry$Results,
-                                     paste("<", chemistry$RDL, sep = "")),
-                              chemistry$Results)
-  
-  chemistry$RDL = NULL  #Drop RDL since placed in results
-  
   
   #####Fix date/time stamp
   
@@ -224,12 +208,16 @@ import_chemistry <- function() {
   
   chemistry$DateTime <- as.POSIXct(paste(chemistry$Date,
                                          chemistry$Time), 
-                                   format = "%Y-%m-%d %H:%M")
+                                   format = "%Y-%m-%d %H:%M",
+                                   tz = "UTC")
+  
   
   #Remove redundent variables
   chemistry$Date <- NULL
   chemistry$Time <- NULL
   
+  #Remove NAs
+  chemistry <- na.omit(chemistry)
   
   #####Remove duplicate rows
   

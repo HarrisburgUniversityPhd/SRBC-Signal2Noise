@@ -17,7 +17,7 @@ import_macro <- function() {
   macroCounts$Time <- temp
   rm(temp)
   
-  macroCounts$DateTime <- as.POSIXct(paste(macroCounts$Date, macroCounts$Time), format = "%Y-%m-%d %H:%M")
+  macroCounts$DateTime <- as.POSIXct(paste(macroCounts$Date, macroCounts$Time), format = "%Y-%m-%d %H:%M", tz="UTC")
   
   #Convert fish names to all lowercase to avoid duplicates & some other data cleanup.
   macroCounts$Macrostemum <- tolower(macroCounts$Macrostemum)
