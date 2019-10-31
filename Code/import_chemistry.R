@@ -234,8 +234,8 @@ import_chemistry <- function() {
                                     StationName +
                                     Parameter +
                                     DateTime, 
-                                  duplicates, 
-                                  mean)
+                                  data = duplicates, 
+                                  FUN = "mean")
   
   #Add averaged duplicates back in
   chemistry <- rbind(chemistry, duplicatesAveraged)
