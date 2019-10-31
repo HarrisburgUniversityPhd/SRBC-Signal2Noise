@@ -10,15 +10,16 @@ Corr_SRBC <- function(allData) {
   
   #factor_data <- Filter(is.factor, allData)
   
-  # convert factro data into numeric
+  # convert factor data into numeric
   allData1 <- allData
   indx <- sapply(allData1, is.factor)
   allData1[indx] <- lapply(allData1[indx], function(x) as.numeric(as.factor(x)))
   
   # remove some of the variables such as Station ID, Alias Name, Latitude, etc.
   allData1$DateTime <- NULL
-  allData1[,ID_name[c(1:6)]] <- list(NULL)
-  allData1[,c(1,325,326)] <- NULL # remove station ID, "Station.ID", "Latitude", "Longitude"  
+  allData1$Date <- NULL
+  allData1[,ID_name[c(1:12)]] <- list(NULL)
+  allData1[,c(1,326,327)] <- NULL # remove station ID, "Station.ID", "Latitude", "Longitude"  
   
   str(allData1)
   #colnames(allData1)
@@ -27,7 +28,7 @@ Corr_SRBC <- function(allData) {
   allData1 <- sapply(allData1, as.numeric)
   
   # remove count data for fish and macro
-  allData2 <- allData1[,-c(44:98,104:323)]
+  allData2 <- allData1[,-c(40:94,100:319)]
   
   # calculate correlation matrix and significance levels
   corre_ent2 <- rcorr(as.matrix(allData2))
