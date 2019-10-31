@@ -1257,7 +1257,7 @@ library(reshape2)
 
 
 # Calculate Correlation matrix for fish data along with fish metrics
-allData3 <- fishCounts2[,-c(1:3)]
+allData3 <- fishCounts2[,-c(1:3, 64)]
 
 corre_ent3 <- rcorr(as.matrix(allData3))
 
@@ -1306,6 +1306,77 @@ rpvalue2 <- (cor_p3[31:60,31:60])
 ggheatmap(rcoeff2, rpvalue2, 3)
 ```
 
+### Calculate Correlaton between MacroCount and Macro metrics
+Pranita Patil
+```{r}
+if (!require('ggplot2')) install.packages('ggplot2', quiet=TRUE)
+library(ggplot2)
+if (!require('reshape2')) install.packages('reshape2', quiet=TRUE)
+library(reshape2)
+
+
+# Calculate Correlation matrix for fish data along with fish metrics
+allData4 <- macroCounts2[,-c(1:2, 228)]
+
+corre_ent4 <- rcorr(as.matrix(allData4))
+
+cor_coef4 <- corre_ent4$r
+cor_p4 <- corre_ent4$P
+
+# function to visualize correlation matrix
+ggheatmap <- function(upper_tri, upper_tri_p, i) 
+{
+  # Melt the correlation matrix
+diag(upper_tri_p) <- Inf
+  melted_cormat <- melt(upper_tri)
+melted_cormat_p <- melt(upper_tri_p)
+melted_cormat_stars <- cut(melted_cormat_p$value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+ggheatmap1 <-ggplot(melted_cormat, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white",
+                       midpoint = 0, limit = c(-1,1), space = "Lab",
+                       name="Pearson\nCorrelation") +
+  geom_text(aes(label=melted_cormat_stars), color="black", size=2) +
+  geom_tile(data = subset(melted_cormat,  is.na(value)),fill = "white")+
+  geom_tile(data = subset(melted_cormat_p,  is.na(value)),fill = "white")+
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 9, hjust = 1))+
+  coord_fixed()
+
+# Print the heatmap
+print(ggheatmap1)
+ggsave(ggheatmap1, file=paste0("plot_corr_macro_data", i,".png"), width = 20, height = 20, units = "cm")
+
+}
+
+# Visualize Correlation matrix as whole 
+# rcoeff <-(cor_coef4)
+# rpvalue <- (cor_p4)
+# ggheatmap(rcoeff, rpvalue, 1)
+
+# Visualize above Correlation matrix in two parts for visibility
+rcoeff1 <-(cor_coef4[1:45,181:225])
+rpvalue1 <- (cor_p4[1:45,181:225])
+ggheatmap(rcoeff1, rpvalue1, 2)
+
+rcoeff2 <-(cor_coef4[46:90,181:225])
+rpvalue2 <- (cor_p4[46:90,181:225])
+ggheatmap(rcoeff2, rpvalue2, 3)
+
+rcoeff3 <-(cor_coef4[91:135,181:225])
+rpvalue3 <- (cor_p4[91:135,181:225])
+ggheatmap(rcoeff3, rpvalue3, 4)
+
+rcoeff4 <-(cor_coef4[136:180,181:225])
+rpvalue4 <- (cor_p4[136:180,181:225])
+ggheatmap(rcoeff4, rpvalue4, 5)
+
+rcoeff5 <-(cor_coef4[181:225,181:225])
+rpvalue5 <- (cor_p4[181:225,181:225])
+ggheatmap(rcoeff5, rpvalue5, 6)
+```
+
 ### Calculate correlations
 Pranita Patil
 ```{r}
@@ -1326,25 +1397,25 @@ cor_p2 <- corr_results[[2]]
 k=1
 # corplots = list()
 
-for (i in seq(1, 142, by=29))
-  for (j in seq(1, 142, by=29))
+for (i in seq(1, dim(cor_coef2)[1], by=28))
+  for (j in seq(1, dim(cor_coef2)[1], by=28))
 {
     # get whole correlation matrix
-    if(i==117 & j!=117){
-    upper_tri <- (cor_coef2[i:(i+25),j:(j+28)])
-    upper_tri_p <- (cor_p2[i:(i+25),j:(j+28)])  
+    if(i==113 & j!=113){
+    upper_tri <- (cor_coef2[i:(i+(dim(cor_coef2)[1]-113)),j:(j+28-1)])
+    upper_tri_p <- (cor_p2[i:(i+(dim(cor_coef2)[1]-113)),j:(j+28-1)])  
     }
-    else if(j==117 & i!=117){
-      upper_tri <- (cor_coef2[i:(i+28),j:(j+25)])
-      upper_tri_p <- (cor_p2[i:(i+28),j:(j+25)]) 
+    else if(j==113 & i!=113){
+      upper_tri <- (cor_coef2[i:(i+28-1),j:(j+(dim(cor_coef2)[1]-113))])
+      upper_tri_p <- (cor_p2[i:(i+28-1),j:(j+(dim(cor_coef2)[1]-113))]) 
     }
-    else if(j==117 & i==117){
-      upper_tri <- (cor_coef2[i:(i+25),j:(j+25)])
-      upper_tri_p <- (cor_p2[i:(i+25),j:(j+25)]) 
+    else if(j==113 & i==113){
+      upper_tri <- (cor_coef2[i:(i+(dim(cor_coef2)[1]-113)),j:(j+(dim(cor_coef2)[1]-113))])
+      upper_tri_p <- (cor_p2[i:(i+(dim(cor_coef2)[1]-113)),j:(j+(dim(cor_coef2)[1]-113))]) 
     }
     else{
-    upper_tri <- (cor_coef2[i:(i+28),j:(j+28)])
-    upper_tri_p <- (cor_p2[i:(i+28),j:(j+28)])
+    upper_tri <- (cor_coef2[i:(i+28-1),j:(j+28-1)])
+    upper_tri_p <- (cor_p2[i:(i+28-1),j:(j+28-1)])
     }
     if(k==1 | k==7 | k==13 | k==19 | k==25 ){
       diag(upper_tri_p) <- Inf
