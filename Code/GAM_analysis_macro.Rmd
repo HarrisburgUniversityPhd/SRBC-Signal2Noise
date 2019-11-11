@@ -1,0 +1,1406 @@
+---
+title: "GAM_grid_search_analysis_macro"
+author: "Pranita Patil"
+date: "August 20, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# This code is dependent on Main_SRBC3.rmd file. So before running this code, first run Main_SRBC3.rmd file.
+
+#### Input Data- Pranita
+```{r}
+if (!require('mgcv')) install.packages('mgcv', quiet=TRUE)
+# if (!require('NMOF')) install.packages('NMOF', quiet=TRUE)
+if (!require('PLYR')) install.packages('PLYR', quiet=TRUE)
+
+# library(NMOF)
+
+library(mgcv)
+library(plyr) 
+library(dplyr)
+library(reshape2)
+library(GGally)
+library(tidyr)
+library(lubridate)
+
+#macroData <- readRDS('C:/Users/PPPatil/Documents/PhD/SRBC_Project/Code/macroData.rds')
+
+macroData <- plyr::rename(macroData,c("Oxygen (mg/l)" = "Oxygen",
+                              "Potassium (mg/l)" = "Potassium",
+                              "Ammonia (mg/l)" = "Ammonia", 
+                              "Nitrate-N (mg/l)" = "Nitrate",
+                              "Alkalinity (mg/l)" = "Alkalinity",
+                              "Strontium (mg/l)" = "Strontium",
+                              "Barium (ug/l)" = "Barium",
+                              "TDS (mg/l)" = "TDS",
+                              "Flow (cfs)" = "Flow"))
+
+gam_data_macro <- macroData[!is.na(macroData$Hills_N1_macro),]
+
+
+summary(gam_data_macro$pH)
+summary(gam_data_macro$WaterTemp)
+summary(gam_data_macro$Turbidity)
+summary(gam_data_macro$SpCond)
+summary(gam_data_macro$O2Dis)
+summary(gam_data_macro$Alkalinity)
+summary(gam_data_macro$TDS)
+summary(gam_data_macro$Potassium)
+summary(gam_data_macro$Ammonia)
+summary(gam_data_macro$Nitrate)
+summary(gam_data_macro$Strontium)
+summary(gam_data_macro$Flow)
+
+
+dd <- gam_data_macro[c(47:51,grep("Oxygen", colnames(gam_data_macro)),
+                 grep("Flow", colnames(gam_data_macro)),
+                 grep("Alkalinity", colnames(gam_data_macro))[1],
+                 grep("Hills_N1_macro", colnames(gam_data_macro)),
+                 grep("Hills_N2_macro", colnames(gam_data_macro)),
+                 grep("margalef_macro", colnames(gam_data_macro)),
+                 grep("pielou_macro", colnames(gam_data_macro)))] 
+
+plot(dd)
+plot(dd$Hills_N1_macro)
+plot(dd$Hills_N1_macro, dd$Turbidity)
+plot(dd$Hills_N1_macro, dd$WaterTemp)
+plot(dd$Hills_N1_macro, dd$SpCond)
+plot(dd$Hills_N1_macro, dd$Oxygen)
+
+ggpairs(dd)
+
+```
+
+#### Missing value imputation- Pranita
+```{r}
+## process data.frame producing binary indicators of missingness,
+## mx0, mx1 etc. For each missing value create a level of a factor
+## idx0, idx1, etc. So idx0 has as many levels as x0 has missing 
+## values. Replace the NA's in each variable by the mean of the 
+## non missing for that variable...
+
+dname <- names(gam_data_macro)[c(grep("WaterTemp", colnames(gam_data_macro)),
+                         grep("SpCond", colnames(gam_data_macro)),grep("Turbidity", colnames(gam_data_macro))[2],
+                         grep("O2Dis", colnames(gam_data_macro)), grep("pH", colnames(gam_data_macro))[2],
+                         grep("TDS", colnames(gam_data_macro)),
+                         grep("Potassium", colnames(gam_data_macro)),grep("Strontium", colnames(gam_data_macro)),
+                         grep("Barium", colnames(gam_data_macro)),
+                         grep("Alkalinity", colnames(gam_data_macro))[1],grep("Flow", colnames(gam_data_macro)))]
+gam_dat_macro1 <- gam_data_macro
+n <-  dim(gam_dat_macro1)[1]
+for (i in 1:11) {
+  by.name <- paste("m",dname[i],sep="") 
+  gam_dat_macro1[[by.name]] <- is.na(gam_dat_macro1[[dname[i]]])
+  gam_dat_macro1[[dname[i]]][gam_dat_macro1[[by.name]]] <- mean(gam_dat_macro1[[dname[i]]],na.rm=TRUE)
+  lev <- rep(1,n);lev[gam_dat_macro1[[by.name]]] <- 1:sum(gam_dat_macro1[[by.name]])
+  id.name <- paste("id",dname[i],sep="")
+  gam_dat_macro1[[id.name]] <- factor(lev) 
+  gam_dat_macro1[[by.name]] <- as.numeric(gam_dat_macro1[[by.name]])
+}
+```
+
+#Manual Search
+```{r}
+
+gam_dat_macro2 <- gam_dat_macro1[-c(53),]
+
+#####
+# add stream order as input to gam model
+
+#allData<-readRDS("D:/RWD/allData_01122019.rds")
+attributest <-attributes[,c("Station.Name","StationID","StreamOrder","Longitude", "Latitude")]
+macroCounts2t <- macroCounts2[,c("Station.Name","StationID","DateTime",
+                                 "pielou_macro","Hills_N1_macro", "Hills_N2_macro")]
+
+
+allDatat<- merge(attributest,macroCounts2t,by = "StationID",all = TRUE)
+allDatat<- allDatat%>% drop_na(Hills_N1_macro)
+# allDatat <- allDatat[,c("StationID","StreamOrder","DateTime","Longitude", "Latitude","pielou","Hills_N1", "Hills_N2")]
+#Aggregate Logitude and latitude at 0.1 resilution
+allDatat$Long2 <- round(allDatat$Longitude,1)
+allDatat$Lat2 <- round(allDatat$Latitude,1)
+#Create new long-lat grid index
+allDatat$LongLat2 <- paste(allDatat$Lat2,"-",allDatat$Long2)
+#Extract year and month and convert them to factors
+allDatat$Year=year(allDatat$DateTime)
+allDatat$Month=month(allDatat$DateTime)
+allDatat$StreamOrder <- as.factor(allDatat$StreamOrder)
+allDatat$Year2 <- as.factor(allDatat$Year)
+allDatat$Month2 <- as.factor(allDatat$Month)
+
+trial1 <- merge(gam_dat_macro1,allDatat,by = c("DateTime", "StationID"),all = TRUE)
+
+#one outlier removal
+trial2 <- trial1[-c(53),]
+
+gam2_hills_N1_macro6 <- gam(Hills_N1_macro.y ~
+                        (pH) +
+                        s(Turbidity,k=15) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=10)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial2, na.action = 'na.omit', gamma = 1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1_macro6)
+
+#concurvity(gam2_hills_N1_macro6)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1_macro6)
+
+#Plotting the Model
+
+#Plotting the Model
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1_macro6,se = TRUE)
+
+#plot(gam2_hills_N1_macro6, all.terms = TRUE, seWithMean = TRUE)
+plot(gam2_hills_N1_macro6,se = TRUE, all.terms = TRUE)
+
+
+
+AIC(gam2_hills_N1_macro6)
+
+## Three outliers removal
+trial3 <- trial1[-c(53,48,25),]
+
+gam2_hills_N1_macro7 <- gam(Hills_N1_macro.y ~
+                        (pH) +
+                        s(Turbidity,k=10) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=15)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial3, na.action = 'na.omit', gamma = 1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1_macro7)
+
+#concurvity(gam2_hills_N1_macro6)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1_macro7)
+
+#Plotting the Model
+
+#Plotting the Model
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1_macro6,se = TRUE)
+
+#plot(gam2_hills_N1_macro6, all.terms = TRUE, seWithMean = TRUE)
+plot(gam2_hills_N1_macro7,se = TRUE, all.terms = TRUE)
+
+
+
+AIC(gam2_hills_N1_macro7)
+
+## No Outlier Removal
+
+gam2_hills_N1_macro8 <- gam(Hills_N1_macro.y ~
+                        (pH) +
+                        s(Turbidity,k=10) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=15)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial1, na.action = 'na.omit', gamma = 1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1_macro8)
+
+#concurvity(gam2_hills_N1_macro6)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1_macro8)
+
+#Plotting the Model
+
+#Plotting the Model
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1_macro6,se = TRUE)
+
+#plot(gam2_hills_N1_macro6, all.terms = TRUE, seWithMean = TRUE)
+plot(gam2_hills_N1_macro8,se = TRUE, all.terms = TRUE)
+
+AIC(gam2_hills_N1_macro8)
+
+
+#library("schoenberg")
+## point-wise interval
+
+# fit <- predict( gam2_hills_N1_macro6 , se = TRUE )$fit
+# se <- predict( gam2_hills_N1_macro6 , se = TRUE)$se.fit
+# lcl <- fit - 1.96 * se
+# ucl <- fit + 1.96 * se
+
+#ci <- confint(gam2_hills_N1_macro6, parm = "pH", level = 0.95, type = "confidence")
+#head(ci)
+
+#plot(gam2_hills_N1_macro6,se = TRUE, shade = TRUE, all.terms = TRUE)
+
+
+# oo <- plot.gam(gam2_hills_N1_macro6)
+# oo <- oo[[1]]
+# lcl <- oo$fit - oo$se
+# ucl <-  oo$fit + oo$se
+
+
+```
+#### To check N2 performance using gam2_hills_N1_macro1 model of N1 for macro
+```{r}
+
+#####
+# add stream order as input to gam model
+
+gam2_hills_N2_macro2 <- gam(Hills_N2_macro.y ~
+                        (pH) +
+                        s(Turbidity,k=15) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=10)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial2, na.action = 'na.omit', gamma = 1.4)
+
+
+summary(gam2_hills_N2_macro2)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N2_macro2)
+
+#Plotting the Model
+#par(mfrow=c(2,4))
+
+plot(gam2_hills_N2_macro2,se = TRUE, all.terms = TRUE) 
+
+AIC(gam2_hills_N2_macro2)
+
+```
+#### To check margalef performance using gam2_hills_N1_macro1 model of N1 for macro
+```{r}
+
+gam2_margalef_macro2 <- gam(margalef_macro ~ 
+                        (pH) +
+                        s(Turbidity,k=15) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=10)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial2, na.action = 'na.omit', gamma = 1.4)  # method REML results not better than GCV
+
+summary(gam2_margalef_macro2)
+
+# check the smoothing basis dimensions
+gam.check(gam2_margalef_macro2)
+
+#Plotting the Model
+
+plot(gam2_margalef_macro2,se = TRUE, all.terms = TRUE) 
+
+AIC(gam2_margalef_macro2)
+
+```
+#### To check Pielou performance using gam2_hills_N1_macro1 model of N1 for macro
+```{r}
+#####
+# add stream order as input to gam model
+
+gam2_pielou_macro2 <- gam(pielou_macro.y ~ 
+                        (pH) +
+                        s(Turbidity,k=15) +
+                        s(SpCond,k=15, bs="ad") +
+                        s(O2Dis,k=15) +
+                        s(TDS,k=10) +
+                        s(Flow,k=10)+
+                        s(Alkalinity,k=10)+
+                        (StreamOrder),
+                        data= trial2, na.action = 'na.omit', gamma = 1.4) 
+
+summary(gam2_pielou_macro2)
+
+# check the smoothing basis dimensions
+gam.check(gam2_pielou_macro2)
+
+#Plotting the Model
+
+plot(gam2_pielou_macro2,se = TRUE, all.terms = TRUE) 
+
+AIC(gam2_pielou_macro2)
+```
+#### Simulations for Hills N1
+```{r}
+library(MASS)
+
+set.seed(50)
+n_sim <- 1000
+
+# replicate the data for simulation purpose- uniform distribution
+rep_data_draw <- function(x, n) runif(n, min = min(x), max = max(x))
+
+rep_data2 <- data.frame(sapply(trial2[, c('pH','Turbidity','SpCond','O2Dis','TDS','Flow','Alkalinity')], rep_data_draw, n = n_sim))
+
+rep_data1 <- data.frame(round(rep_data_draw(as.integer(trial2$StreamOrder),n_sim)))
+
+colnames(rep_data1) <- 'StreamOrder'
+
+rep_data <-cbind(rep_data2, rep_data1)
+
+# evaluate fitted model by using prediction data
+
+# rep_data <- with(gam_dat_macro2, data.frame(pH = seq(min(pH), max(pH), length = n_sim), 
+#                                         WaterTemp = seq(min(WaterTemp), max(WaterTemp), length = n_sim), 
+#                                         Turbidity = seq(min(Turbidity), max(Turbidity), length = n_sim), 
+#                                         SpCond = seq(min(SpCond), max(SpCond), length = n_sim), 
+#                                         O2Dis = seq(min(O2Dis), max(O2Dis), length = n_sim), 
+#                                         Oxygen = seq(min(Oxygen), max(Oxygen), length = n_sim), 
+#                                         Flow = seq(min(Flow), max(Flow), length = n_sim), 
+#                                         Alkalinity = seq(min(Alkalinity), max(Alkalinity), length = n_sim)))
+
+
+hist(gam_dat_macro2$Hills_N1_macro)
+
+# Model 1
+pred <- predict(gam2_hills_N1_macro6,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_hills_N1_macro6,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_hills_N1_macro6)
+#vc <- gam2_hills_N1_macro3$Vp
+vc <- vcov(gam2_hills_N1_macro6)
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_N1 <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_N1)
+
+# mean.hills_N1 <- rep(NA,n)
+# for (i in 1:n) { ## loop to get trough to peak diff for each sim
+# pred.a <- Xp%*%sim_N1[i,] ## curve for this replicate
+# mean.hills_N1[i] <- sum(pred.a) ## range for this curve
+# }
+
+
+mean.hills_N1 <- colMeans((Xp%*%t(sim_N1)))
+hist(mean.hills_N1) # posterior distribution of mean diversity N1 conditional on the estimated smoothing parameters
+
+# Confidence interval -95%
+con_int <- quantile(mean.hills_N1, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.hills_N1, c(.01,1))
+con_int_99
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Predictions match with original values
+SamePred <- predict(gam2_hills_N1_macro6, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat_macro2$Hills_N1_macro) 
+summary(pred)
+
+# opt <- rep(NA, n)
+# ilink <- family(m)$linkinv
+# for (i in seq_len(n)) { 
+#   pred   <- ilink(Xp %*% mrand[i, ])
+#   opt[i] <- p$locs[which.max(pred)]
+# }
+
+# library('ggplot2')
+# theme_set(theme_bw())
+# 
+# ggplot(gam_dat_macro2) +
+#   geom_point(aes(x = Turbidity, y = Hills_N1_macro), colour = "grey") +
+#   geom_line(aes(x = Turbidity, y = SamePred$fit), colour = "forestgreen", size = 1.3) +
+#   geom_line(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue") +
+#   geom_point(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue", size = 2) 
+  # geom_point(aes(x = Turbidity, y = sim_N1), data = rep_data, colour = "red",
+  #            size = 2)
+
+```
+
+#### Simulations for Hills N2
+```{r}
+
+
+# evaluate fitted model by using prediction data
+
+# want <- seq(1, nrow(gam_dat_macro2), length.out = 100)
+# pdat <- with(gam_dat_macro2,
+#              data.frame(pH = pH[want], WaterTemp = WaterTemp[want],
+#                         Turbidity = Turbidity[want]))
+hist(gam_dat_macro2$Hills_N2_macro)
+
+pred <- predict(gam2_hills_N2_macro2,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_hills_N2_macro2,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_hills_N2_macro2)
+#vc <- gam2_hills_N2_macro$Vp
+vc <- vcov(gam2_hills_N2_macro2)
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_N2 <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_N2)
+
+mean.hills_N2 <- colMeans((Xp%*%t(sim_N2)))
+hist(mean.hills_N2)
+
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Confidence interval -95%
+con_int <- quantile(mean.hills_N2, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.hills_N2, c(.01,1))
+con_int_99
+# Predictions match with original values
+SamePred <- predict(gam2_hills_N2_macro2, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat_macro2$Hills_N2_macro) 
+summary(pred)
+
+# opt <- rep(NA, n)
+# ilink <- family(m)$linkinv
+# for (i in seq_len(n)) { 
+#   pred   <- ilink(Xp %*% mrand[i, ])
+#   opt[i] <- p$locs[which.max(pred)]
+# }
+
+# library('ggplot2')
+# theme_set(theme_bw())
+# 
+# ggplot(gam_dat_macro2) +
+#   geom_point(aes(x = Turbidity, y = Hills_N1_macro), colour = "grey") +
+#   geom_line(aes(x = Turbidity, y = SamePred$fit), colour = "forestgreen", size = 1.3) +
+#   geom_line(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue") +
+#   geom_point(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue", size = 2) 
+  # geom_point(aes(x = Turbidity, y = sim_N1), data = rep_data, colour = "red",
+  #            size = 2)
+
+
+```
+
+#### Simulations for Margalef
+```{r}
+
+
+# evaluate fitted model by using prediction data
+
+# want <- seq(1, nrow(gam_dat_macro2), length.out = 100)
+# pdat <- with(gam_dat_macro2,
+#              data.frame(pH = pH[want], WaterTemp = WaterTemp[want],
+#                         Turbidity = Turbidity[want]))
+hist(gam_dat_macro2$margalef_macro)
+
+pred <- predict(gam2_margalef_macro2,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_margalef_macro2,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_margalef_macro2)
+vc <- gam2_margalef_macro2$Vp
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_margalef <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_margalef)
+
+mean.margalef <- colMeans((Xp%*%t(sim_margalef)))
+hist(mean.margalef)
+
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Confidence interval -95%
+con_int <- quantile(mean.margalef, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.margalef, c(.01,1))
+con_int_99
+# Predictions match with original values
+SamePred <- predict(gam2_margalef_macro2, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat_macro2$margalef_macro)
+summary(pred)
+
+# opt <- rep(NA, n)
+# ilink <- family(m)$linkinv
+# for (i in seq_len(n)) { 
+#   pred   <- ilink(Xp %*% mrand[i, ])
+#   opt[i] <- p$locs[which.max(pred)]
+# }
+
+# library('ggplot2')
+# theme_set(theme_bw())
+# 
+# ggplot(gam_dat_macro2) +
+#   geom_point(aes(x = Turbidity, y = Hills_N1_macro), colour = "grey") +
+#   geom_line(aes(x = Turbidity, y = SamePred$fit), colour = "forestgreen", size = 1.3) +
+#   geom_line(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue") +
+#   geom_point(aes(x = Turbidity, y = pred), data = rep_data, colour = "blue", size = 2) 
+  # geom_point(aes(x = Turbidity, y = sim_N1), data = rep_data, colour = "red",
+  #            size = 2)
+
+```
+
+#### Sensitivity Analysis Macro
+```{r warning = FALSE}
+library(ggplot2)
+# library(cowplot)
+library(dsm)
+library(ggthemes)
+
+
+dd1 <- trial2[, c('pH','Turbidity','SpCond','O2Dis','TDS','Flow','Alkalinity','StreamOrder')]
+
+#dd1 <- gam_dat_macro2[, c('pH','WaterTemp','Turbidity','SpCond','O2Dis','Oxygen','Flow','Alkalinity')]
+
+#Hills_N1 Macro
+
+# Function to Create Datasets for sensitivity analysis
+Data_sentv <- function(x, n_sentv, minn, maxx, StreamO) {
+  Data_news <- dd1[FALSE,]
+  indxx <-grep(x, colnames(dd1))
+  #Data_sentv[,indxx] <- seq(min(dd1[,'x']), max(dd1[,'x']), length = 100)
+  gen_se <- seq(minn, maxx, by = n_sentv)
+  Data_news[1:length(gen_se),indxx] <- gen_se
+  Data_news[,8] <- rep(mean(StreamO,nrow(Data_news)))
+  #Data_news <- data.frame(x = seq(minn, maxx, by = n_sentv))
+  #j=2
+  for (i in 1:7){
+    if(i!=indxx){
+      Data_news[,i] <- rep(mean(dd1[,i]),nrow(Data_news))
+    }
+  }
+  return(Data_news)
+}
+
+```
+
+
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+# hist(gam_dat_macro2$pH)
+# summary(gam_dat_macro2$pH)
+# 
+# for (StreamO in 1:6) {
+# Data_result <- Data_sentv('pH', 0.01, min(gam_dat_macro2$pH), max(gam_dat_macro2$pH), StreamO)
+# 
+# pred <- predict(gam2_hills_N1_macro5, Data_result, se.fit=TRUE, type="response")
+# summary(pred$fit)
+# # plot(Data_result$pH, pred$fit)
+# var(pred$fit)
+# var(gam_dat_macro2$Hills_N1_macro)
+# 
+# # boxplot(pred$fit)
+# # boxplot(gam_dat_macro2$Hills_N1_macro,data=gam_dat_macro2)
+# 
+# 
+# #  i1 <- ggplot(Data_result,aes(x=pH, y=pred$fit)) + geom_boxplot()
+# #  i2 <- ggplot(gam_dat_macro2,aes(x=pH, y=Hills_N1_macro)) + geom_boxplot()
+# # # plot_grid(i1, i2, labels = c('Pred','Orig'))
+# #  i1
+# #  i2
+# 
+# perct <- quantile(pred$fit, c(0,0.25,0.5,1,1))
+# #perct <- quantile(pred$fit)
+# pred_values <- pred$fit[pred$fit >= perct[2] & pred$fit <= perct[4]]
+# pred_ind <- which(pred$fit >= perct[2] & pred$fit <= perct[4])
+# pred_input <- Data_result[pred_ind,]
+# 
+# # plot(Data_result$pH, pred$fit)
+# # abline(v=c(pred_input$pH[1],tail(pred_input$pH, n=1)), col=c("red", "red"), lty=c(1,2), lwd=c(1, 3))
+# 
+# Data_result$group <- cut(Data_result$pH,c(1,2,3))
+# Data_result$predd <- pred$fit
+# Data_result$group <- ifelse(Data_result$predd >= perct[2] & Data_result$predd <= perct[4], 'Signal', 'Noise')
+# 
+# # Simple scatter plot
+# sp <- ggplot(data=Data_result, aes(x=pH, y=pred$fit, color=group)) + geom_point(aes(shape=group, color=group), size=1.8) +  
+#   labs(x = "pH", y = "Hills N1 Macro")
+# # Add a vertical line at x = 3
+# sp +  scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"), values=c("red", "green")) + 
+#   geom_vline(xintercept = c(pred_input$pH[1],tail(pred_input$pH, n=1)),  col=c("red", "red"), size=1) +
+#   ggtitle("N1 vs pH- For observed range") +  
+#   geom_text(aes(x=pred_input$pH[1],
+#            y=min(gam_dat_macro2$pH)),label= pred_input$pH[1],hjust=0, size=3.5, show.legend = FALSE) + 
+#   geom_text(aes(x=tail(pred_input$pH, n=1),
+#            y=min(gam_dat_macro2$pH)),label=tail(pred_input$pH, n=1),hjust=1, size=3.5, show.legend = FALSE) + theme_gray()
+# 
+# }
+# 
+# #########################################################
+# #Normal range for pH
+# 
+# Data_result1 <- Data_sentv('pH', 0.1, 1, 10) # 4 to 9
+# 
+# pred1 <- predict(gam2_hills_N1_macro5, Data_result1, se.fit=TRUE, type="response")
+# summary(pred1$fit)
+# # plot(Data_result1$pH, pred1$fit)
+# var(pred1$fit)
+# var(gam_dat_macro2$Hills_N1_macro)
+# 
+# 
+# perct <- quantile(pred1$fit)
+# pred_values <- pred1$fit[pred1$fit >= perct[2] & pred1$fit <= perct[4]]
+# pred_ind <- which(pred1$fit >= perct[2] & pred1$fit <= perct[4])
+# pred_input <- Data_result1[pred_ind,]
+# 
+# # plot(Data_result1$pH, pred1$fit)
+# # abline(v=c(pred_input$pH[1],tail(pred_input$pH, n=1)), col=c("red", "red"), lty=c(1,2), lwd=c(1, 3))
+# 
+# Data_result1$group <- cut(Data_result1$pH,c(1,2,3))
+# Data_result1$predd <- pred1$fit
+# Data_result1$group <- ifelse(Data_result1$predd >= perct[2] & Data_result1$predd <= perct[4], 'Signal', 'Noise')
+# 
+# # Simple scatter plot
+# sp <- ggplot(data=Data_result1, aes(x=pH, y=pred1$fit, color=group)) + geom_point(aes(shape=group, color=group), size=1.8) +  
+#   labs(x = "pH", y = "Hills N1 Macro")
+# # Add a vertical line at x = 3
+# sp + scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"),
+#                         values=c("red", "green")) + 
+#   geom_vline(xintercept = c(pred_input$pH[1],tail(pred_input$pH, n=1)),  col=c("red", "red"), size=1) +
+#   ggtitle("N1 vs pH - for 1-10 range") +  
+#   geom_text(aes(x=pred_input$pH[1],
+#            y=1),label= pred_input$pH[1],hjust=0, size=3.5, show.legend = FALSE) + 
+#   geom_text(aes(x=tail(pred_input$pH, n=1),
+#            y=1),label=tail(pred_input$pH, n=1),hjust=1, size=3.5, show.legend = FALSE) + theme_gray()
+# 
+# 
+# #
+# #
+# # i1 <- ggplot(Data_result,aes(x=pH, y=pred$fit)) + geom_boxplot()
+# # i2 <- ggplot(Data_result1,aes(x=pH, y=pred1$fit)) + geom_boxplot()
+# # i3 <- ggplot(gam_dat_macro2,aes(x=pH, y=Hills_N1_macro)) + geom_boxplot()
+# # plot_grid(i1, i2, i3, labels = c('Pred1-20','Pred1-10', 'Orig'),nrow = 1, align='h')
+# # 
+# # #mydf <- data.frame(d.type=c(rep('Pred1-20',nrow(Data_result)),rep('Pred1-10',nrow(Data_result1)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, pred1$fit, gam_dat_macro2$Hills_N1_macro),x=c(Data_result$pH,Data_result1$pH, gam_dat_macro2$pH))
+# # 
+# mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)),rep('Pred1-10',nrow(Data_result1)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, pred1$fit, gam_dat_macro2$Hills_N1_macro))
+# 
+# p <- ggplot(mydf, aes(x=1, y))
+# p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type)
+# # 
+# # 
+# # 
+# # # Predictions match with original values
+# # # SamePred <- predict(gam2_hills_N1_macro5, se.fit=TRUE,type="response") 
+# # # summary(SamePred$fit) 
+# # summary(gam_dat_macro2$Hills_N1_macro) 
+# 
+# 
+# # vis.concurvity(gam2_hills_N1_macro5)
+# # concurvity(gam2_hills_N1_macro5)
+
+```
+
+
+```{r warning = FALSE}
+
+# Function to plot 
+Plot_sentv <- function(x, y, Data_result, gam_model, minn, title, StreamO) {
+indxx <-grep(x, colnames(dd1))
+
+pred <- predict(gam_model, Data_result, se.fit=TRUE, type="response")
+summary(pred$fit)
+# plot(Data_result$pH, pred$fit)
+#var(pred$fit)
+#var(gam_dat_macro2$Hills_N1_macro)
+
+
+#perct <- quantile(pred$fit)
+perct <- quantile(pred$fit, c(0,0.25,0.5,1,1))
+pred_values <- pred$fit[pred$fit >= perct[2] & pred$fit <= perct[4]]
+pred_ind <- which(pred$fit >= perct[2] & pred$fit <= perct[4])
+pred_input <- Data_result[pred_ind,]
+
+# plot(Data_result$pH, pred$fit)
+# abline(v=c(pred_input$pH[1],tail(pred_input$pH, n=1)), col=c("red", "red"), lty=c(1,2), lwd=c(1, 3))
+
+Data_result$group <- cut(Data_result[,indxx],c(1,2,3))
+Data_result$predd <- pred$fit
+Data_result$group <- ifelse(Data_result$predd >= perct[2] & Data_result$predd <= perct[4], 'Signal', 'Noise')
+
+# find indices for noise data
+ind_noise <- which((Data_result$group == "Noise"))
+intc_noise  <- unname(tapply(ind_noise, cumsum(c(1, diff(ind_noise)) != 1), range))
+ii<-1
+intc_val <- NULL
+for (i in 1:(length(intc_noise))) {
+  intc_val[ii] <- Data_result[intc_noise[[i]][1]-1, indxx] #-1 will give me signal instead of noise
+  ii=ii+1
+  intc_val[ii] <- Data_result[intc_noise[[i]][2]+1, indxx] #+1 will give me signal instead of noise
+  ii=ii+1
+}
+
+events <- data.frame(text = round(c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),2))
+
+# Simple scatter plot
+sp <- ggplot(data=Data_result, aes(x=Data_result[,indxx], y=pred$fit, color=group)) + geom_point(aes(shape=group, color=group), size=1.8) +  
+  labs(x = bquote(atop(.(x))), y = bquote(atop(.(y))))
+
+# Add a vertical line at x = 3
+
+# sp1 <- sp +  scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"), values=c("red", "green")) +
+#   geom_vline(xintercept = c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),  col="red", size=1) +
+#   ggtitle(bquote(atop(.(title)))) +
+#   geom_text(aes(x=pred_input[1,indxx],
+#            y=minn),label= pred_input[1,indxx],hjust=0, size=3.5, show.legend = FALSE, color="red") +
+#   geom_text(aes(x=tail(pred_input[,indxx], n=1),
+#            y=minn),label=tail(pred_input[,indxx], n=1),hjust=1, size=3.5, show.legend = FALSE,color="red") + theme_gray()
+
+sp1 <- sp +  scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"), values=c("red", "green")) +
+  geom_vline(xintercept = c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),  col="red", size=1) +
+  ggtitle(bquote(atop(.(title)))) +
+  geom_text(data=events, mapping = aes(x = text,
+                  y=-Inf, label = text),
+            vjust= -1, hjust = -0.2, size=2.5, show.legend = FALSE, color="red")
+
+print(sp1)
+ggsave(sp1, file=paste0(title,StreamO,".png"), path = 'C:\\Users\\PPPatil\\Documents\\PhD\\SRBC_Project\\Code_PP\\gam sensitivity\\Final_new\\Macro')
+
+return(list(pred,sp1))
+
+}
+
+```
+
+#### Sensitivity Analysis including Stream Order
+```{r warning = FALSE}
+# #Sensitivity analysis to pH variations
+#gam_dat_macro2 <- gam_dat_macro1[-c(53,48,25),]
+hist(gam_dat_macro2$pH)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat_macro2$pH), max(gam_dat_macro2$pH), StreamO)
+
+outp <- Plot_sentv ('pH', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs pH- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+```
+
+
+```{r warning = FALSE}
+# # #Sensitivity analysis to Barium variations
+# hist(gam_dat_macro2$Barium)
+# 
+# for (StreamO in 1:6) {
+# Data_result <- Data_sentv('Barium', 0.1, min(gam_dat_macro2$Barium), max(gam_dat_macro2$Barium), StreamO)
+# 
+# outp <- Plot_sentv ('Barium', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs Barium- For observed range", StreamO)
+# pred <- outp[[1]]
+# outp[[2]]
+# outp[[2]][["plot_env"]][["intc_val"]]
+# 
+# mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+# p <- ggplot(mydf, aes(x=factor(0), y))
+# p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+#     xlab(NULL) + ylab("Hills N1 Macro")
+# }
+```
+
+
+```{r warning = FALSE}
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat_macro2$SpCond)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat_macro2$SpCond), max(gam_dat_macro2$SpCond), StreamO)
+outp <- Plot_sentv ('SpCond', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs SpCond- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+```
+
+
+
+```{r warning = FALSE}
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat_macro2$Turbidity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat_macro2$Turbidity), max(gam_dat_macro2$Turbidity), StreamO)
+outp <- Plot_sentv ('Turbidity', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs Turbidity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+```
+
+```{r warning = FALSE}
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat_macro2$O2Dis)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat_macro2$O2Dis), max(gam_dat_macro2$O2Dis), StreamO)
+outp <- Plot_sentv ('O2Dis', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs O2Dis- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+```
+
+
+```{r warning = FALSE}
+# #Sensitivity analysis to TDS variations
+hist(gam_dat_macro2$TDS)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('TDS', 0.5, min(gam_dat_macro2$TDS), max(gam_dat_macro2$TDS), StreamO)
+outp <- Plot_sentv ('TDS', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs TDS- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+
+```
+
+
+```{r warning = FALSE}
+# #Sensitivity analysis to Flow variations
+hist(gam_dat_macro2$Flow)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Flow', 1, min(gam_dat_macro2$Flow), max(gam_dat_macro2$Flow), StreamO)
+outp <- Plot_sentv ('Flow', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs Flow- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+
+```
+
+
+
+```{r warning = FALSE}
+# #Sensitivity analysis to Alkalinity variations
+hist(gam_dat_macro2$Alkalinity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Alkalinity', 0.1, min(gam_dat_macro2$Alkalinity), max(gam_dat_macro2$Alkalinity), StreamO)
+outp <- Plot_sentv ('Alkalinity', 'Hills N1 Macro', Data_result, gam2_hills_N1_macro6, min(gam_dat_macro2$Hills_N1_macro), title="N1 vs Alkalinity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N1_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1 Macro")
+}
+
+```
+
+# Sensitivity analysis for N2 with StreamOrder
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+hist(gam_dat_macro2$pH)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat_macro2$pH), max(gam_dat_macro2$pH), StreamO)
+outp <- Plot_sentv ('pH', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs pH- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# # #Sensitivity analysis to Barium variations
+# hist(gam_dat_macro2$Barium)
+# 
+# for (StreamO in 1:6) {
+# Data_result <- Data_sentv('Barium', 0.1, min(gam_dat_macro2$Barium), max(gam_dat_macro2$Barium), StreamO)
+# outp <- Plot_sentv ('Barium', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs Barium- For observed range", StreamO)
+# pred <- outp[[1]]
+# outp[[2]]
+# outp[[2]][["plot_env"]][["intc_val"]]
+# 
+# mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+# p <- ggplot(mydf, aes(x=factor(0), y))
+# p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+#     xlab(NULL) + ylab("Hills N2 Macro")
+# }
+
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat_macro2$SpCond)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat_macro2$SpCond), max(gam_dat_macro2$SpCond), StreamO)
+outp <- Plot_sentv ('SpCond', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs SpCond- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat_macro2$Turbidity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat_macro2$Turbidity), max(gam_dat_macro2$Turbidity), StreamO)
+outp <- Plot_sentv ('Turbidity', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs Turbidity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat_macro2$O2Dis)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat_macro2$O2Dis), max(gam_dat_macro2$O2Dis), StreamO)
+outp <- Plot_sentv ('O2Dis', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs O2Dis- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# #Sensitivity analysis to TDS variations
+hist(gam_dat_macro2$TDS)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('TDS', 0.5, min(gam_dat_macro2$TDS), max(gam_dat_macro2$TDS), StreamO)
+outp <- Plot_sentv ('TDS', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs TDS- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# #Sensitivity analysis to Flow variations
+hist(gam_dat_macro2$Flow)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Flow', 1, min(gam_dat_macro2$Flow), max(gam_dat_macro2$Flow), StreamO)
+outp <- Plot_sentv ('Flow', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs Flow- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+
+# #Sensitivity analysis to Alkalinity variations
+hist(gam_dat_macro2$Alkalinity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Alkalinity', 0.1, min(gam_dat_macro2$Alkalinity), max(gam_dat_macro2$Alkalinity), StreamO)
+outp <- Plot_sentv ('Alkalinity', 'Hills N2 Macro', Data_result, gam2_hills_N2_macro2, min(gam_dat_macro2$Hills_N2_macro), title="N2 vs Alkalinity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$Hills_N2_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2 Macro")
+}
+```
+
+
+# Sensitiviyt analysis for margalef with StreamOrder
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+hist(gam_dat_macro2$pH)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat_macro2$pH), max(gam_dat_macro2$pH), StreamO)
+outp <- Plot_sentv ('pH', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs pH- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# # #Sensitivity analysis to Barium variations
+# hist(gam_dat_macro2$Barium)
+# 
+# for (StreamO in 1:6) {
+# Data_result <- Data_sentv('Barium', 0.1, min(gam_dat_macro2$Barium), max(gam_dat_macro2$Barium), StreamO)
+# outp <- Plot_sentv ('Barium', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs Barium- For observed range", StreamO)
+# pred <- outp[[1]]
+# outp[[2]]
+# outp[[2]][["plot_env"]][["intc_val"]]
+# 
+# mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+# p <- ggplot(mydf, aes(x=factor(0), y))
+# p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+#     xlab(NULL) + ylab("Margalef Macro")
+# }
+
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat_macro2$SpCond)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat_macro2$SpCond), max(gam_dat_macro2$SpCond), StreamO)
+outp <- Plot_sentv ('SpCond', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs SpCond- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat_macro2$Turbidity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat_macro2$Turbidity), max(gam_dat_macro2$Turbidity), StreamO)
+outp <- Plot_sentv ('Turbidity', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs Turbidity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat_macro2$O2Dis)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat_macro2$O2Dis), max(gam_dat_macro2$O2Dis), StreamO)
+outp <- Plot_sentv ('O2Dis', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs O2Dis- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# #Sensitivity analysis to TDS variations
+hist(gam_dat_macro2$TDS)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('TDS', 0.5, min(gam_dat_macro2$TDS), max(gam_dat_macro2$TDS), StreamO)
+outp <- Plot_sentv ('TDS', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs TDS- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# #Sensitivity analysis to Flow variations
+hist(gam_dat_macro2$Flow)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Flow', 1, min(gam_dat_macro2$Flow), max(gam_dat_macro2$Flow), StreamO)
+outp <- Plot_sentv ('Flow', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs Flow- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+
+# #Sensitivity analysis to Alkalinity variations
+hist(gam_dat_macro2$Alkalinity)
+
+for (StreamO in 1:6) {
+Data_result <- Data_sentv('Alkalinity', 0.1, min(gam_dat_macro2$Alkalinity), max(gam_dat_macro2$Alkalinity), StreamO)
+outp <- Plot_sentv ('Alkalinity', 'Margalef Macro', Data_result, gam2_margalef_macro2, min(gam_dat_macro2$margalef_macro), title="Margalef Macro vs Alkalinity- For observed range", StreamO)
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat_macro2))),y=c(pred$fit, gam_dat_macro2$margalef_macro))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef Macro")
+}
+```
+
+
+
+#### Sensitivity Analysis Macro Derivative
+```{r warning = FALSE}
+library(ggplot2)
+# library(cowplot)
+library(dsm)
+library(ggthemes)
+
+# not useful for factor variable hence not possible to use with StreamOrder as predictor
+
+dd1 <- trial2[, c('pH','Turbidity','SpCond','O2Dis','TDS','Flow','Alkalinity')]
+
+#Hills_N1 Macro
+# 
+# # Function to Create Datasets for sensitivity analysis
+# Data_sentv <- function(x, n_sentv, minn, maxx, StreamO) {
+#   Data_news <- dd1[FALSE,]
+#   indxx <-grep(x, colnames(dd1))
+#   #Data_sentv[,indxx] <- seq(min(dd1[,'x']), max(dd1[,'x']), length = 100)
+#   gen_se <- seq(minn, maxx, by = n_sentv)
+#   Data_news[1:length(gen_se),indxx] <- gen_se
+#   Data_news[,8] <- rep(mean(StreamO,nrow(Data_news)))
+#   #Data_news <- data.frame(x = seq(minn, maxx, by = n_sentv))
+#   #j=2
+#   for (i in 1:7){
+#     if(i!=indxx){
+#       Data_news[,i] <- rep(mean(dd1[,i]),nrow(Data_news))
+#     }
+#   }
+#   return(Data_news)
+# }
+# 
+# 
+# 
+# #Sensitivity analysis to pH variations
+# hist(gam_dat_macro2$pH)
+# summary(gam_dat_macro2$pH)
+# 
+# Data_result <- Data_sentv('pH', 0.01, min(gam_dat_macro2$pH), max(gam_dat_macro2$pH))
+
+# Code by Simpson
+
+`derivSimulCI` <- function(mod, n = 200, eps = 1e-7, newdata, term,
+                           samples = 10000) {
+    stopifnot(require("MASS"))
+    if(inherits(mod, "gamm"))
+        mod <- mod$gam
+    m.terms <- attr(terms(mod), "term.labels")
+    if(missing(newdata)) {
+        newD <- sapply(model.frame(mod)[, m.terms, drop = FALSE],
+                       function(x) seq(min(x), max(x) - (2*eps), length = n))
+        names(newD) <- m.terms
+    } else {
+        newD <- newdata
+    }
+    newDF <- data.frame(newD) ## needs to be a data frame for predict
+    X0 <- predict(mod, newDF, type = "lpmatrix")
+    newDF <- newDF + eps
+    X1 <- predict(mod, newDF, type = "lpmatrix")
+    Xp <- (X1 - X0) / eps
+    Xp.r <- NROW(Xp)
+    Xp.c <- NCOL(Xp)
+    ## dims of bs
+    bs.dims <- sapply(mod$smooth, "[[", "bs.dim") - 1
+    ## number of smooth terms
+    t.labs <- attr(mod$terms, "term.labels")
+    ## match the term with the the terms in the model
+    if(!missing(term)) {
+        want <- grep(term, t.labs)
+        if(!identical(length(want), length(term)))
+            stop("One or more 'term's not found in model!")
+        t.labs <- t.labs[want]
+    }
+    nt <- length(t.labs)
+    ## list to hold the derivatives
+    lD <- vector(mode = "list", length = nt)
+    names(lD) <- t.labs
+    ## sample draws from the posterior distribution of model coefficients
+    Rbeta <- t(mvrnorm(n = samples, coef(mod), vcov(mod)))
+    ## loop over the terms
+    for(i in seq_len(nt)) {
+        want <- grep(t.labs[i], colnames(X1))
+        lD[[i]] <- list(deriv = Xp[, want] %*% coef(mod)[want],
+                        simulations = Xp[, want] %*% Rbeta[want, ])
+    }
+    class(lD) <- "derivSimulCI"
+    lD$gamModel <- mod
+    lD$eps <- eps
+    lD$eval <- newD - eps
+    lD ##return
+}
+
+plot.derivSimulCI <- function(x, alpha = 0.05, polygon = TRUE,
+                              sizer = FALSE, term,
+                              eval = 0, lwd = 9,
+                              col = "lightgrey", border = col,
+                              ylab, xlab, main, ...) {
+    l <- length(x) - 3
+    ## get terms and check specified (if any) are in model
+    term.labs <- names(x[seq_len(l)])
+    if(missing(term)) {
+        term <- term.labs
+    } else {
+        term <- term.labs[match(term, term.labs)]
+    }
+    if(any(miss <- is.na(term)))
+        stop(paste("'term'", term[miss], "not a valid model term."))
+    if(all(miss))
+        stop("All terms in 'term' not found in model.")
+    l <- sum(!miss)
+    nplt <- n2mfrow(l)
+    if(missing(ylab))
+        ylab <- expression(italic(hat(f)*"'"*(x)))
+    if(missing(xlab)) {
+        xlab <- attr(terms(x$gamModel), "term.labels")
+        names(xlab) <- xlab
+    }
+    if (missing(main)) {
+        main <- term
+        names(main) <- term
+    }
+    ## compute confidence interval
+    ciFUN <- function(x, alpha) {
+        ahalf <- alpha / 2
+        apply(x$simulations, 1, quantile, probs = c(ahalf, 1 - ahalf))
+    }
+    CI <- lapply(x[seq_len(l)], ciFUN, alpha = alpha)
+    ## plots
+    layout(matrix(seq_len(l), nrow = nplt[1], ncol = nplt[2]))
+    on.exit(layout(1))
+    for(i in term) {
+        lwr <- CI[[i]][1,]
+        upr <- CI[[i]][2,]
+        ylim <- range(upr, lwr)
+        plot(x$eval[,i], x[[i]]$deriv, type = "n",
+             ylim = ylim, ylab = ylab, xlab = xlab[i], main = main[i], ...)
+        if(isTRUE(polygon)) {
+            polygon(c(x$eval[,i], rev(x$eval[,i])),
+                    c(upr, rev(lwr)), col = col, border = border)
+        } else {
+            lines(x$eval[,i], upr, lty = "dashed")
+            lines(x$eval[,i], lwr, lty = "dashed")
+        }
+        abline(h = 0, ...)
+        if(isTRUE(sizer)) {
+            lines(x$eval[,i], x[[i]]$deriv, lwd = 1)
+            S <- signifD(x[[i]]$deriv, x[[i]]$deriv, upr, lwr,
+                         eval = eval)
+            lines(x$eval[,i], S$incr, lwd = lwd, col = "blue")
+            lines(x$eval[,i], S$decr, lwd = lwd, col = "red")
+        } else {
+            lines(x$eval[,i], x[[i]]$deriv, lwd = 2)
+        }
+    }
+    invisible(x)
+}
+
+signifD <- function(x, d, upper, lower, eval = 0) {
+    miss <- upper > eval & lower < eval
+    incr <- decr <- x
+    want <- d > eval
+    incr[!want | miss] <- NA
+    want <- d < eval
+    decr[!want | miss] <- NA
+    list(incr = incr, decr = decr)
+}
+
+fd <- derivSimulCI(gam2_hills_N1_macro5, samples = 10000)
+plot.derivSimulCI(fd, sizer = TRUE)
+
+
+```
