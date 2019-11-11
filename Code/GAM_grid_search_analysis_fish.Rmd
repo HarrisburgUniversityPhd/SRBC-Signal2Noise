@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# This code is dependent on Main_SRBC3.rmd fiel. So before running this code, first run Main_SRBC3. rmd file.
+# This code is dependent on Main_SRBC3.rmd file. So before running this code, first run Main_SRBC3.rmd file.
 
 # Input Data- Pranita
 ```{r,warning=FALSE}
