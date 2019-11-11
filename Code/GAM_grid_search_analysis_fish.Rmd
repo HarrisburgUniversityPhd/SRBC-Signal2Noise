@@ -1,0 +1,1055 @@
+---
+title: "GAM_grid_search_analysis"
+author: "Pranita Patil"
+date: "August 20, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Input Data- Pranita
+```{r,warning=FALSE}
+if (!require('mgcv')) install.packages('mgcv', quiet=TRUE)
+# if (!require('NMOF')) install.packages('NMOF', quiet=TRUE)
+if (!require('PLYR')) install.packages('PLYR', quiet=TRUE)
+
+# library(NMOF)
+
+library(mgcv)
+library(plyr) 
+library(dplyr)
+library(GGally)
+
+#fishData <- readRDS('C:/Users/PPPatil/Documents/PhD/SRBC_Project/Code/fishData.rds')
+
+fishData <- plyr::rename(fishData,c("Oxygen (mg/l)" = "Oxygen",
+                              "Potassium (mg/l)" = "Potassium",
+                              "Ammonia (mg/l)" = "Ammonia", 
+                              "Nitrate-N (mg/l)" = "Nitrate",
+                              "Iron (ug/l)" = "Iron",
+                              "Barium (ug/l)" = "Barium",
+                              "Flow (cfs)" = "Flow"))
+
+gam_data <- fishData[!is.na(fishData$Hills_N1),]
+
+summary(gam_data$pH)
+summary(gam_data$WaterTemp)
+summary(gam_data$Turbidity)
+summary(gam_data$SpCond)
+summary(gam_data$O2Dis)
+#summary(gam_data$Chlorophyll)
+summary(gam_data$Iron)
+summary(gam_data$Potassium)
+summary(gam_data$Ammonia)
+summary(gam_data$Nitrate)
+summary(gam_data$Flow)
+
+
+dd <- gam_data[c(47:51,
+                 grep("Flow", colnames(gam_data)),
+                 grep("Hills_N1", colnames(gam_data)),
+                 grep("Hills_N2", colnames(gam_data)),
+                 grep("margalef", colnames(gam_data)),
+                 grep("pielou", colnames(gam_data)))] 
+
+plot(dd)
+ggpairs(dd)
+plot(dd$Hills_N1)
+plot(dd$Hills_N1, dd$Turbidity)
+```
+
+
+#### Missing value imputation
+```{r}
+## process data.frame producing binary indicators of missingness,
+## mx0, mx1 etc. For each missing value create a level of a factor
+## idx0, idx1, etc. So idx0 has as many levels as x0 has missing 
+## values. Replace the NA's in each variable by the mean of the 
+## non missing for that variable...
+
+dname <- names(gam_data)[c(grep("WaterTemp", colnames(gam_data)),
+                         grep("SpCond", colnames(gam_data)),grep("Turbidity", colnames(gam_data))[2],
+                         grep("O2Dis", colnames(gam_data)), grep("pH", colnames(gam_data))[2],
+                         grep("Oxygen", colnames(gam_data)),grep("Iron", colnames(gam_data)),
+                         grep("Potassium", colnames(gam_data)),grep("Barium", colnames(gam_data)),
+                         grep("Flow", colnames(gam_data)))]
+gam_dat1 <- gam_data
+n <-  dim(gam_dat1)[1]
+for (i in 1:10) {
+  by.name <- paste("m",dname[i],sep="") 
+  gam_dat1[[by.name]] <- is.na(gam_dat1[[dname[i]]])
+  gam_dat1[[dname[i]]][gam_dat1[[by.name]]] <- mean(gam_dat1[[dname[i]]],na.rm=TRUE)
+  lev <- rep(1,n);lev[gam_dat1[[by.name]]] <- 1:sum(gam_dat1[[by.name]])
+  id.name <- paste("id",dname[i],sep="")
+  gam_dat1[[id.name]] <- factor(lev) 
+  gam_dat1[[by.name]] <- as.numeric(gam_dat1[[by.name]])
+}
+
+
+gam_dat1$Iron <- gam_dat1$Iron/1000
+
+```
+
+
+###GridSearch
+```{r}
+
+# y <- seq(3, 8, length.out = 6)
+# d <- expand.grid(x1 = y, x2 = y,x3 = y,x4 = y,x5 = y,x6 = y,x7 = y)
+# 
+# 
+# gamFun2<- function(x1,x2,x3,x4,x5,x6,x7) {
+#   return( tryCatch( AIC(gam(Hills_N1 ~
+#                         s(pH,k=x1) +
+#                         s(WaterTemp,k=x2) +
+#                         s(Turbidity,k=x3) +
+#                         s(SpCond,k=x4) +
+#                         s(O2Dis,k=x5) +
+#                         s(Iron,k=x6) + 
+#                         s(Flow,k=x7),
+#                         data= gam_dat1, na.action = 'na.omit',gamma=1.4)), error =function(e) {}))
+#           }
+# 
+# result = mdply(d, gamFun2)
+# 
+# #max(result$V1)
+# 
+# write.csv(result, file = "Gam_Grid_new.csv")
+```
+
+
+###GridSearch
+```{r}
+# hist(result$V1)
+# plot(result$x1,result$V1)
+# 
+# boxplot(V1~x1,data=result, main="AIC vs x1",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x2,data=result, main="AIC vs x2",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x3,data=result, main="AIC vs x3",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x4,data=result, main="AIC vs x4",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x5,data=result, main="AIC vs x5",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x6,data=result, main="AIC vs x6",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x7,data=result, main="AIC vs x7",  xlab="Number of Degrees", ylab="AIC")
+
+
+
+```
+
+###Best Model checking
+```{r}
+library(readr)
+result <- read_csv("C:/Users/PPPatil/Documents/PhD/SRBC_Project/Code_PP/Gam_Grid_new.csv")
+result$X1 <- NULL
+result <- as.data.frame(result)
+
+min(result$V1)
+
+indx_min <- which.min(result$V1)
+
+gam1_hills_N1 <- gam(Hills_N1 ~ 
+                        s(pH,k=result[indx_min,1]) +
+                        s(WaterTemp,k=result[indx_min,2]) + 
+                        s(Turbidity,k=result[indx_min,3]) +
+                        s(SpCond,k=result[indx_min,4]) + 
+                        s(O2Dis,k=result[indx_min,5]) + 
+                        s(Iron,k=result[indx_min,6]) +
+                        s(Flow,k=result[indx_min,7]),
+                        data= gam_dat1, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam1_hills_N1)
+
+#concurvity(gam1_hills_N1)
+
+# check the smoothing basis dimensions
+gam.check(gam1_hills_N1)
+
+#Plotting the Model
+
+plot(gam1_hills_N1,se = TRUE) 
+
+AIC(gam1_hills_N1)
+```
+
+###Outlier removal-Pranita
+```{r}
+# gam_dat2 <- gam_dat1[-c(30,37),]
+# 
+# y <- seq(3, 8, length.out = 6)
+# d <- expand.grid(x1 = y, x2 = y,x3 = y,x4 = y,x5 = y,x6 = y,x7 = y)
+# 
+# 
+# gamFun3<- function(x1,x2,x3,x4,x5,x6,x7) {
+#   return( tryCatch( AIC(gam(Hills_N1 ~
+#                         s(pH,k=x1) +
+#                         s(WaterTemp,k=x2) +
+#                         s(Turbidity,k=x3) +
+#                         s(SpCond,k=x4) +
+#                         s(O2Dis,k=x5) +
+#                         s(Iron,k=x6) + 
+#                         s(Flow,k=x7),
+#                         data= gam_dat2, na.action = 'na.omit', gamma=1.4)), error =function(e) {}))
+#           }
+# 
+# result_out = mdply(d, gamFun3)
+# 
+# #max(result_out$V1)
+# 
+# write.csv(result_out, file = "Gam_Grid_outlier_removal_new.csv")
+# 
+# hist(result_out$V1)
+# plot(result_out$x1,result_out$V1)
+# 
+# boxplot(V1~x1,data=result_out, main="AIC vs x1",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x2,data=result_out, main="AIC vs x2",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x3,data=result_out, main="AIC vs x3",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x4,data=result_out, main="AIC vs x4",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x5,data=result_out, main="AIC vs x5",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x6,data=result_out, main="AIC vs x6",  xlab="Number of Degrees", ylab="AIC")
+# boxplot(V1~x7,data=result_out, main="AIC vs x7",  xlab="Number of Degrees", ylab="AIC")
+# 
+# min(result_out$V1)
+```
+
+```{r}
+
+library(readr)
+result_out <- read_csv("C:/Users/PPPatil/Documents/PhD/SRBC_Project/Code_PP/Gam_Grid_outlier_removal_new.csv")
+result_out$X1 <- NULL
+result_out <- as.data.frame(result_out)
+
+indx_min <- which.min(result_out$V1)
+gam_dat2 <- gam_dat1[-c(30,37),]
+
+gam2_hills_N1 <- gam(Hills_N1 ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        s(O2Dis,k=result_out[indx_min,5]) + 
+                        s(Iron,k=result_out[indx_min,6]) +
+                        s(Flow,k=result_out[indx_min,7]),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1)
+
+#Plotting the Model
+
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1,se = TRUE)
+
+plot(gam2_hills_N1,se = TRUE) 
+
+AIC(gam2_hills_N1)
+
+gam2_hills_N1$coefficients
+
+#summary(gam2_hills_N1)$p.table
+
+```
+
+#### To check N2 performance using GAM2 model of N1
+```{r}
+gam2_hills_N2 <- gam(Hills_N2 ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        s(O2Dis,k=result_out[indx_min,5]) + 
+                        s(Iron,k=result_out[indx_min,6]) +
+                        s(Flow,k=result_out[indx_min,7]),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N2)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N2)
+
+#Plotting the Model
+#par(mfrow=c(2,4))
+
+plot(gam2_hills_N2,se = TRUE) 
+
+AIC(gam2_hills_N2)
+
+gam2_hills_N2$coefficients
+```
+
+#### To check margalef performance using GAM2 model of N1
+```{r}
+gam2_margalef <- gam(margalef ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        s(O2Dis,k=result_out[indx_min,5]) + 
+                        s(Iron,k=result_out[indx_min,6]) +
+                        s(Flow,k=result_out[indx_min,7]),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_margalef)
+
+# check the smoothing basis dimensions
+gam.check(gam2_margalef)
+
+#Plotting the Model
+
+plot(gam2_margalef,se = TRUE) 
+
+AIC(gam2_margalef)
+
+gam2_margalef$coefficients
+```
+
+#### To check Pielou performance using GAM2 model of N1
+```{r}
+gam2_pielou <- gam(pielou ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        s(O2Dis,k=result_out[indx_min,5]) + 
+                        s(Iron,k=result_out[indx_min,6]) +
+                        s(Flow,k=result_out[indx_min,7]),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_pielou)
+
+# check the smoothing basis dimensions
+gam.check(gam2_pielou)
+
+#Plotting the Model
+
+plot(gam2_pielou,se = TRUE) 
+
+AIC(gam2_pielou)
+
+gam2_pielou$coefficients
+```
+#### Simulations for Hills N1
+```{r}
+library(MASS)
+
+set.seed(50)
+n_sim <- 1000
+
+# replicate the data for simulation purpose- uniform distribution
+# rep_data_draw <- function(x, n) runif(n, min = min(x), max = max(x))
+# 
+# rep_data <- data.frame(sapply(gam_dat_macro2[, c('pH','WaterTemp','Turbidity','SpCond','O2Dis','Oxygen','Flow','Alkalinity')], rep_data_draw, n = n_sim))
+
+# evaluate fitted model by using prediction data
+
+rep_data <- with(gam_dat2, data.frame(pH = seq(min(pH), max(pH), length = n_sim), 
+                                        WaterTemp = seq(min(WaterTemp), max(WaterTemp), length = n_sim), 
+                                        Turbidity = seq(min(Turbidity), max(Turbidity), length = n_sim), 
+                                        SpCond = seq(min(SpCond), max(SpCond), length = n_sim), 
+                                        O2Dis = seq(min(O2Dis), max(O2Dis), length = n_sim), 
+                                        Iron = seq(min(Iron), max(Iron), length = n_sim), 
+                                        Flow = seq(min(Flow), max(Flow), length = n_sim)))
+
+
+hist(gam_dat2$Hills_N1)
+
+# Model 1
+pred <- predict(gam2_hills_N1,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_hills_N1,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_hills_N1)
+#vc <- gam2_hills_N1_macro3$Vp
+vc <- vcov(gam2_hills_N1)
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_N1 <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_N1)
+
+# mean.hills_N1 <- rep(NA,n)
+# for (i in 1:n) { ## loop to get trough to peak diff for each sim
+# pred.a <- Xp%*%sim_N1[i,] ## curve for this replicate
+# mean.hills_N1[i] <- max(pred.a)-min(pred.a) ## range for this curve
+# }
+
+
+mean.hills_N1 <- colMeans((Xp%*%t(sim_N1)))
+hist(mean.hills_N1) # posterior distribution of mean diversity N1 conditional on the estimated smoothing parameters
+
+# Confidence interval -95%
+con_int <- quantile(mean.hills_N1, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.hills_N1, c(.01,1))
+con_int_99
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Predictions match with original values
+SamePred <- predict(gam2_hills_N1, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat2$Hills_N1) 
+```
+####simulation Hills N2
+```{r}
+
+hist(gam_dat2$Hills_N2)
+
+# Model 1
+pred <- predict(gam2_hills_N2,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_hills_N2,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_hills_N2)
+#vc <- gam2_hills_N1_macro3$Vp
+vc <- vcov(gam2_hills_N2)
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_N2 <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_N1)
+
+# mean.hills_N1 <- rep(NA,n)
+# for (i in 1:n) { ## loop to get trough to peak diff for each sim
+# pred.a <- Xp%*%sim_N1[i,] ## curve for this replicate
+# mean.hills_N1[i] <- max(pred.a)-min(pred.a) ## range for this curve
+# }
+
+
+mean.hills_N2 <- colMeans((Xp%*%t(sim_N2)))
+hist(mean.hills_N2) # posterior distribution of mean diversity N1 conditional on the estimated smoothing parameters
+
+# Confidence interval -95%
+con_int <- quantile(mean.hills_N2, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.hills_N2, c(.01,1))
+con_int_99
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Predictions match with original values
+SamePred <- predict(gam2_hills_N2, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat2$Hills_N2) 
+```
+
+####simulation Margalef
+```{r}
+
+hist(gam_dat2$margalef)
+
+# Model 1
+pred <- predict(gam2_margalef,rep_data, type="response")
+
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2)
+# lines(pred ~ Turbidity, data = rep_data, col = "red")
+
+## now get variance of sum of predictions using lpmatrix
+
+Xp <- predict(gam2_margalef,rep_data,type="lpmatrix") 
+
+coefs <- coef(gam2_margalef)
+#vc <- gam2_hills_N1_macro3$Vp
+vc <- vcov(gam2_margalef)
+
+## simulation from posterior distribution of the params
+set.seed(100)
+sim_margalef <- mvrnorm(n=10000, coefs, vc) ##  replicate param. vectors
+#head(sim_N1)
+
+# mean.hills_N1 <- rep(NA,n)
+# for (i in 1:n) { ## loop to get trough to peak diff for each sim
+# pred.a <- Xp%*%sim_N1[i,] ## curve for this replicate
+# mean.hills_N1[i] <- max(pred.a)-min(pred.a) ## range for this curve
+# }
+
+
+mean.margalef <- colMeans((Xp%*%t(sim_margalef)))
+hist(mean.margalef) # posterior distribution of mean diversity N1 conditional on the estimated smoothing parameters
+
+# Confidence interval -95%
+con_int <- quantile(mean.margalef, c(.025,.975))
+con_int
+#99%
+con_int_99 <- quantile(mean.margalef, c(.01,1))
+con_int_99
+# want <- grep("Turbidity", colnames(Xp))
+# fits <- Xp[, want] %*% t(sim_N1[, want])
+# ylims <- range(fits)
+# plot(Hills_N1_macro ~ Turbidity, data = gam_dat_macro2, pch = 19, ylim = ylims, type = "n")
+# #lines(pred ~ Turbidity, data = p, col = "red")
+# matlines(rep_data$Turbidity, fits, col = "black", lty = "solid")
+
+# Predictions match with original values
+SamePred <- predict(gam2_margalef, se.fit=TRUE,type="response") 
+summary(SamePred$fit) 
+summary(gam_dat2$margalef) 
+```
+
+
+#### Sensitivity Analysis functions for fish
+```{r warning = FALSE}
+library(ggplot2)
+# library(cowplot)
+library(dsm)
+library(ggthemes)
+
+dd1 <- gam_dat2[, c('pH','WaterTemp','Turbidity','SpCond','O2Dis','Iron','Flow')]
+
+# Function to Create Datasets for sensitivity analysis
+Data_sentv <- function(x, n_sentv, minn, maxx) {
+  Data_news <- dd1[FALSE,]
+  indxx <-grep(x, colnames(dd1))
+  #Data_sentv[,indxx] <- seq(min(dd1[,'x']), max(dd1[,'x']), length = 100)
+  gen_se <- seq(minn, maxx, by = n_sentv)
+  Data_news[1:length(gen_se),indxx] <- gen_se
+  #Data_news <- data.frame(x = seq(minn, maxx, by = n_sentv))
+  #j=2
+  for (i in 1:7){
+    if(i!=indxx){
+      Data_news[,i] <- rep(mean(dd1[,i]),nrow(Data_news))
+    }
+  }
+  return(Data_news)
+}
+
+
+# Function to plot 
+Plot_sentv <- function(x, y, Data_result, gam_model, minn, title) {
+indxx <-grep(x, colnames(dd1))
+
+pred <- predict(gam_model, Data_result, se.fit=TRUE, type="response")
+summary(pred$fit)
+# plot(Data_result$pH, pred$fit)
+#var(pred$fit)
+#var(gam_dat_macro2$Hills_N1_macro)
+
+
+#perct <- quantile(pred$fit)
+perct <- quantile(pred$fit, c(0,0.25,0.5,1,1))
+pred_values <- pred$fit[pred$fit >= perct[2] & pred$fit <= perct[4]]
+pred_ind <- which(pred$fit >= perct[2] & pred$fit <= perct[4])
+pred_input <- Data_result[pred_ind,]
+
+# plot(Data_result$pH, pred$fit)
+# abline(v=c(pred_input$pH[1],tail(pred_input$pH, n=1)), col=c("red", "red"), lty=c(1,2), lwd=c(1, 3))
+
+Data_result$group <- cut(Data_result[,indxx],c(1,2,3))
+Data_result$predd <- pred$fit
+Data_result$group <- ifelse(Data_result$predd >= perct[2] & Data_result$predd <= perct[4], 'Signal', 'Noise')
+
+# find indices for noise data
+ind_noise <- which((Data_result$group == "Noise"))
+intc_noise  <- unname(tapply(ind_noise, cumsum(c(1, diff(ind_noise)) != 1), range))
+ii<-1
+intc_val <- NULL
+for (i in 1:(length(intc_noise))) {
+  intc_val[ii] <- Data_result[intc_noise[[i]][1]-1, indxx] #-1 will give me signal instead of noise
+  ii=ii+1
+  intc_val[ii] <- Data_result[intc_noise[[i]][2]+1, indxx] #+1 will give me signal instead of noise
+  ii=ii+1
+}
+
+events <- data.frame(text = round(c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),2))
+
+# Simple scatter plot
+sp <- ggplot(data=Data_result, aes(x=Data_result[,indxx], y=pred$fit, color=group)) + geom_point(aes(shape=group, color=group), size=1.8) +  
+  labs(x = bquote(atop(.(x))), y = bquote(atop(.(y))))
+
+# Add a vertical line at x = 3
+
+# sp1 <- sp +  scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"), values=c("red", "green")) +
+#   geom_vline(xintercept = c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),  col="red", size=1) +
+#   ggtitle(bquote(atop(.(title)))) +
+#   geom_text(aes(x=pred_input[1,indxx],
+#            y=minn),label= pred_input[1,indxx],hjust=0, size=3.5, show.legend = FALSE, color="red") +
+#   geom_text(aes(x=tail(pred_input[,indxx], n=1),
+#            y=minn),label=tail(pred_input[,indxx], n=1),hjust=1, size=3.5, show.legend = FALSE,color="red") + theme_gray()
+
+sp1 <- sp +  scale_shape_manual(values=c(1, 16)) + scale_color_manual(breaks = c("Noise", "Signal"), values=c("red", "green")) +
+  geom_vline(xintercept = c(pred_input[1,indxx], intc_val, tail(pred_input[,indxx], n=1)),  col="red", size=1) +
+  ggtitle(bquote(atop(.(title)))) +
+  geom_text(data=events, mapping = aes(x = text,
+                  y=-Inf, label = text),
+            vjust= -1, hjust = -0.1, size=2.5, show.legend = FALSE, color="red")
+
+print(sp1)
+ggsave(sp1, file=paste0(title,".png"), path = 'C:\\Users\\PPPatil\\Documents\\PhD\\SRBC_Project\\Code_PP\\gam sensitivity\\Final_new\\Fish')
+
+return(list(pred,sp1))
+}
+
+
+```
+
+# Sensitivity analysis for N1
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+hist(gam_dat2$pH)
+
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat2$pH), max(gam_dat2$pH))
+outp <- Plot_sentv ('pH', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs pH- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+
+# #Sensitivity analysis to WaterTemp variations
+hist(gam_dat2$WaterTemp)
+
+Data_result <- Data_sentv('WaterTemp', 0.1, min(gam_dat2$WaterTemp), max(gam_dat2$WaterTemp))
+outp <- Plot_sentv ('WaterTemp', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs WaterTemp- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat2$SpCond)
+
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat2$SpCond), max(gam_dat2$SpCond))
+outp <- Plot_sentv ('SpCond', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs SpCond- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat2$Turbidity)
+
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat2$Turbidity), max(gam_dat2$Turbidity))
+outp <- Plot_sentv ('Turbidity', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs Turbidity- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat2$O2Dis)
+
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat2$O2Dis), max(gam_dat2$O2Dis))
+outp <- Plot_sentv ('O2Dis', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs O2Dis- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+# #Sensitivity analysis to Iron variations
+hist(gam_dat2$Iron)
+
+Data_result <- Data_sentv('Iron', 0.01, min(gam_dat2$Iron), max(gam_dat2$Iron))
+outp <- Plot_sentv ('Iron', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs Iron- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+
+# #Sensitivity analysis to Flow variations
+hist(gam_dat2$Flow)
+
+Data_result <- Data_sentv('Flow', 1, min(gam_dat2$Flow), max(gam_dat2$Flow))
+outp <- Plot_sentv ('Flow', 'Hills N1', Data_result, gam2_hills_N1, min(gam_dat2$Hills_N1), title="N1 vs Flow- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N1))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N1")
+```
+
+# Sensitivity analysis for N2
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+hist(gam_dat2$pH)
+
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat2$pH), max(gam_dat2$pH))
+outp <- Plot_sentv ('pH', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs pH- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+
+# #Sensitivity analysis to WaterTemp variations
+hist(gam_dat2$WaterTemp)
+
+Data_result <- Data_sentv('WaterTemp', 0.1, min(gam_dat2$WaterTemp), max(gam_dat2$WaterTemp))
+outp <- Plot_sentv ('WaterTemp', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs WaterTemp- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat2$SpCond)
+
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat2$SpCond), max(gam_dat2$SpCond))
+outp <- Plot_sentv ('SpCond', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs SpCond- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat2$Turbidity)
+
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat2$Turbidity), max(gam_dat2$Turbidity))
+outp <- Plot_sentv ('Turbidity', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs Turbidity- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat2$O2Dis)
+
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat2$O2Dis), max(gam_dat2$O2Dis))
+outp <- Plot_sentv ('O2Dis', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs O2Dis- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+# #Sensitivity analysis to Iron variations
+hist(gam_dat2$Iron)
+
+Data_result <- Data_sentv('Iron', 0.01, min(gam_dat2$Iron), max(gam_dat2$Iron))
+outp <- Plot_sentv ('Iron', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs Iron- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+
+# #Sensitivity analysis to Flow variations
+hist(gam_dat2$Flow)
+
+Data_result <- Data_sentv('Flow', 1, min(gam_dat2$Flow), max(gam_dat2$Flow))
+outp <- Plot_sentv ('Flow', 'Hills N2', Data_result, gam2_hills_N2, min(gam_dat2$Hills_N2), title="N2 vs Flow- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$Hills_N2))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Hills N2")
+```
+
+
+# Sensitivity analysis for Margalef
+```{r warning = FALSE}
+
+# #Sensitivity analysis to pH variations
+hist(gam_dat2$pH)
+
+Data_result <- Data_sentv('pH', 0.01, min(gam_dat2$pH), max(gam_dat2$pH))
+outp <- Plot_sentv ('pH', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs pH- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+
+# #Sensitivity analysis to WaterTemp variations
+hist(gam_dat2$WaterTemp)
+
+Data_result <- Data_sentv('WaterTemp', 0.1, min(gam_dat2$WaterTemp), max(gam_dat2$WaterTemp))
+outp <- Plot_sentv ('WaterTemp', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs WaterTemp- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+
+# #Sensitivity analysis to SpCond variations
+hist(gam_dat2$SpCond)
+
+Data_result <- Data_sentv('SpCond', 0.001, min(gam_dat2$SpCond), max(gam_dat2$SpCond))
+outp <- Plot_sentv ('SpCond', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs SpCond- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+# #Sensitivity analysis to Turbidity variations
+hist(gam_dat2$Turbidity)
+
+Data_result <- Data_sentv('Turbidity', 0.05, min(gam_dat2$Turbidity), max(gam_dat2$Turbidity))
+outp <- Plot_sentv ('Turbidity', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs Turbidity- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+# #Sensitivity analysis to O2Dis variations
+hist(gam_dat2$O2Dis)
+
+Data_result <- Data_sentv('O2Dis', 0.03, min(gam_dat2$O2Dis), max(gam_dat2$O2Dis))
+outp <- Plot_sentv ('O2Dis', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs O2Dis- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+# #Sensitivity analysis to Iron variations
+hist(gam_dat2$Iron)
+
+Data_result <- Data_sentv('Iron', 0.01, min(gam_dat2$Iron), max(gam_dat2$Iron))
+outp <- Plot_sentv ('Iron', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs Iron- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+
+# #Sensitivity analysis to Flow variations
+hist(gam_dat2$Flow)
+
+Data_result <- Data_sentv('Flow', 1, min(gam_dat2$Flow), max(gam_dat2$Flow))
+outp <- Plot_sentv ('Flow', 'Margalef', Data_result, gam2_margalef, min(gam_dat2$margalef), title="Margalef vs Flow- For observed range")
+pred <- outp[[1]]
+outp[[2]]
+outp[[2]][["plot_env"]][["intc_val"]]
+
+mydf <- data.frame(d.type=c(rep('Pred-observed range',nrow(Data_result)), rep('Orig',nrow(gam_dat2))),y=c(pred$fit, gam_dat2$margalef))
+p <- ggplot(mydf, aes(x=factor(0), y))
+p + geom_boxplot(outlier.colour = "red", outlier.shape = 1) + geom_jitter(width = 0.2) + facet_grid(. ~ d.type) + scale_x_discrete(breaks = NULL) +
+    xlab(NULL) + ylab("Margalef")
+```
+
+
+
+
+# Remove variables Flow and Iron which contain high degree of missing values
+#### N1 performance using GAM2 model
+```{r}
+
+library(readr)
+result_out <- read_csv("C:/Users/PPPatil/Documents/PhD/SRBC_Project/Code_PP/Gam_Grid_outlier_HighMissFactor_removal_new.csv")
+result_out$X1 <- NULL
+result_out <- as.data.frame(result_out)
+
+indx_min <- which.min(result_out$V1)
+gam_dat2 <- gam_dat1[-c(30,37),]
+
+gam2_hills_N1 <- gam(Hills_N1 ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        s(O2Dis,k=result_out[indx_min,5]),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1)
+
+#Plotting the Model
+
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1,se = TRUE)
+
+plot(gam2_hills_N1,se = TRUE) 
+
+AIC(gam2_hills_N1)
+
+gam2_hills_N1$coefficients
+
+gam2_hills_N1 <- gam(Hills_N1 ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        (O2Dis),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N1)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N1)
+
+#Plotting the Model
+
+# par(mfrow=c(2,4))
+# plot(gam2_hills_N1,se = TRUE)
+
+plot(gam2_hills_N1,se = TRUE, all.terms = TRUE) 
+
+AIC(gam2_hills_N1)
+
+gam2_hills_N1$coefficients
+
+#summary(gam2_hills_N1)$p.table
+```
+
+#### To check N2 performance using GAM2 model of N1
+```{r}
+gam2_hills_N2 <- gam(Hills_N2 ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        (O2Dis) ,
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_hills_N2)
+
+# check the smoothing basis dimensions
+gam.check(gam2_hills_N2)
+
+#Plotting the Model
+#par(mfrow=c(2,4))
+
+plot(gam2_hills_N2,se = TRUE) 
+
+AIC(gam2_hills_N2)
+
+gam2_hills_N2$coefficients
+```
+#### To check margalef performance using GAM2 model of N1
+```{r}
+gam2_margalef <- gam(margalef ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        (O2Dis),
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_margalef)
+
+# check the smoothing basis dimensions
+gam.check(gam2_margalef)
+
+#Plotting the Model
+
+plot(gam2_margalef,se = TRUE) 
+
+AIC(gam2_margalef)
+
+gam2_margalef$coefficients
+```
+#### To check Pielou performance using GAM2 model of N1
+```{r}
+gam2_pielou <- gam(pielou ~ 
+                        s(pH,k=result_out[indx_min,1]) +
+                        s(WaterTemp,k=result_out[indx_min,2]) + 
+                        s(Turbidity,k=result_out[indx_min,3]) +
+                        s(SpCond,k=result_out[indx_min,4]) + 
+                        (O2Dis) ,
+                        data= gam_dat2, na.action = 'na.omit', gamma=1.4) # method REML results not better than GCV
+
+summary(gam2_pielou)
+
+# check the smoothing basis dimensions
+gam.check(gam2_pielou)
+
+#Plotting the Model
+
+plot(gam2_pielou,se = TRUE) 
+
+AIC(gam2_pielou)
+
+gam2_pielou$coefficients
+```
