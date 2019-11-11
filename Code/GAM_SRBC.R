@@ -1,4 +1,0 @@
-GAM_SRBC <- function() {
-  
-  
-}
