@@ -1,4 +1,0 @@
-GLM_SRBC <- function() {
-  
-  
-}
